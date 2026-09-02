@@ -42,8 +42,8 @@ export default function MapCanvas({ flights, selectedId, onSelect }) {
       instanceRef.current = map
 
       L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
-        { maxZoom: 19, subdomains: 'abcd' }
+        'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+        { maxZoom: 20 }
       ).addTo(map)
 
       L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map)
