@@ -36,6 +36,8 @@ export default function MapCanvas({ flights, selectedId, onSelect }) {
 
       const map = L.map(mapRef.current, {
         center: [22, 78], zoom: 5,
+        maxBoundsViscosity: 1.0,
+        maxBounds: [[-90, -180], [90, 180]],
         zoomControl: false,
         attributionControl: false,
       })
