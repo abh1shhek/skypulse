@@ -87,11 +87,13 @@ export default function MapCanvas({ flights, selectedId, onSelect }) {
     }
 
     return () => {
-      if (instanceRef.current) {
-        instanceRef.current.remove()
-        instanceRef.current = null
+        if (instanceRef.current) {
+          instanceRef.current.remove()
+          instanceRef.current = null
+          markersRef.current = {}
+          linesRef.current = {}
+        }
       }
-    }
   }, [flights])
 
   // Update markers when selection changes
