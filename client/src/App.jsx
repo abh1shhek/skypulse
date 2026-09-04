@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import useFlightStore from './store/useFlightStore'
 import Sidebar from './components/sidebar'
 import MapCanvas from './components/MapCanvas'
@@ -49,7 +50,9 @@ export default function App() {
   }, [setSelected])
 
   return (
-    <div className="ops-shell">
+    <>
+      <Analytics />
+      <div className="ops-shell">
       <Sidebar />
       {sidebarOpen && <div className="rail-backdrop" onClick={() => setSidebarOpen(false)} />}
 
@@ -96,6 +99,7 @@ export default function App() {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
