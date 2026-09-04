@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: skypulse-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: AVIATIONSTACK_KEY
+        sync: false
+      - key: MEDIASTACK_KEY
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false

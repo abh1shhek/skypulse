@@ -1,35 +1,42 @@
-# SkyPulse ✈️
+# SkyPulse
 
-Real-time flight tracking and aviation news dashboard.
+Live flight tracking dashboard. Frontend on Vercel, API on Render.
 
-## Tech Stack
-- **Backend:** Node.js, Express, Axios
-- **Frontend:** React, Vite, Tailwind CSS, Leaflet.js *(coming soon)*
-- **APIs:** Aviationstack, Mediastack
-- **Deploy:** Render (server) · Vercel (client)
+## Local
 
-## Features
-- Live flight tracking on an interactive dark map
-- Search by flight number or route (DEL → BOM)
-- Real-time aviation news by airline or city
-- Secure API proxy — keys never exposed to client
-- Rate limiting to protect free API quota
-
-## Local Setup
-
-### Backend
 ```bash
+# API
 cd server
+cp .env.example .env   # add Aviationstack + Mediastack keys
 npm install
-cp .env.example .env
-# Add your API keys to .env
+npm run dev
+
+# UI
+cd client
+npm install
 npm run dev
 ```
 
-### API Endpoints
+Open http://localhost:5173 — Vite proxies `/api` to port 8000.
+
+## Deploy
+
+### Render (backend)
+
+1. New Web Service, root directory `server`
+2. Build: `npm install` · Start: `npm start`
+3. Env vars: `AVIATIONSTACK_KEY`, `MEDIASTACK_KEY`, `CLIENT_ORIGIN` (your Vercel URL, e.g. `https://skypulse.vercel.app`)
+
+### Vercel (frontend)
+
+1. Root directory: `client`
+2. Env: `VITE_API_URL` = `https://<your-render-service>.onrender.com/api`
+3. Redeploy after setting the env var (Vite inlines it at build time)
+
+## API
+
 | Endpoint | Description |
 |----------|-------------|
-| `GET /health` | Server status |
+| `GET /health` | Status |
 | `GET /api/flights?dep_iata=DEL` | Flights by departure |
-| `GET /api/flights?flight_iata=AI302` | Flight by number |
-| `GET /api/news?keywords=Air+India` | Aviation news |
+| `GET /api/news?keywords=aviation` | News |

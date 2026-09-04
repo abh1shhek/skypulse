@@ -12,9 +12,22 @@ const newsRoutes   = require('./routes/news');
 const app  = express();
 const PORT = process.env.PORT || 8000;
 
-app.use(helmet());
+const extraOrigins = (process.env.CLIENT_ORIGIN || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin(origin, cb) {
+    if (!origin) return cb(null, true);
+    const allowed =
+      extraOrigins.includes(origin) ||
+      /^http:\/\/localhost:\d+$/.test(origin) ||
+      /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) ||
+      origin.endsWith('.vercel.app');
+    return cb(null, allowed);
+  },
 }));
 app.use(express.json());
 app.use(limiter);
@@ -26,6 +39,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`SkyPulse server running on port ${PORT}`);
 });

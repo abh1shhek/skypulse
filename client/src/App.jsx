@@ -1,90 +1,98 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import useFlightStore from './store/useFlightStore'
 import Sidebar from './components/sidebar'
 import MapCanvas from './components/MapCanvas'
 import DetailPanel from './components/DetailPanel'
 import FlightCard from './components/FlightCard'
+import { I, Icon } from './components/icons'
 
 export default function App() {
-  const { flights, news, selectedId, loading, fetchFlights, fetchNews, setSelected } = useFlightStore()
-  const selected = flights.find(f => f.id === selectedId)
+  const {
+    flights, selectedId, loading, query, error,
+    fetchFlights, fetchNews, setSelected, tick, sidebarOpen, setSidebarOpen,
+  } = useFlightStore()
+
+  const mapApi = useRef(null)
+  const selected = flights.find((f) => f.uid === selectedId)
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return flights
+    return flights.filter((f) =>
+      [f.id, f.callsign, f.airline, f.from, f.to, f.fromCity, f.toCity]
+        .join(' ')
+        .toLowerCase()
+        .includes(q)
+    )
+  }, [flights, query])
 
   useEffect(() => {
     fetchFlights({ dep_iata: 'DEL' })
-    fetchNews('aviation India')
+    fetchNews('aviation')
   }, [])
 
+  useEffect(() => {
+    const id = setInterval(() => tick(), 1200)
+    return () => clearInterval(id)
+  }, [tick])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && e.target.tagName !== 'INPUT') {
+        e.preventDefault()
+        document.querySelector('.rail__search input')?.focus()
+      }
+      if (e.key === 'Escape') setSelected(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setSelected])
+
   return (
-    <div style={{
-      display: 'flex', height: '100vh', width: '100vw',
-      overflow: 'hidden', background: '#111'
-    }}>
+    <div className="ops-shell">
+      <Sidebar />
+      {sidebarOpen && <div className="rail-backdrop" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar — always visible */}
-      <Sidebar news={news} />
-
-      {/* Detail panel — slides in when flight selected */}
-      {selected && (
-        <DetailPanel
-          flight={selected}
-          onClose={() => setSelected(null)}
-        />
-      )}
-
-      {/* Map + bottom cards */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minWidth: 0 }}>
+      <div className="ops-stage">
         <MapCanvas
-          flights={flights}
+          flights={visible}
           selectedId={selectedId}
-          onSelect={(id) => setSelected(id === selectedId ? null : id)}
+          onSelect={(id) => setSelected(id)}
+          onReady={(api) => { mapApi.current = api }}
         />
+        <div className="map-vignette" />
 
-        {/* Bottom flight cards */}
-        <div style={{
-          position: 'absolute', bottom: 20, left: 16, right: 16,
-          display: 'flex', gap: 12, overflowX: 'auto',
-          zIndex: 10, paddingBottom: 4,
-        }}>
-          {loading && (
-            <p style={{ color: '#555', fontSize: 12, padding: '14px 0' }}>Loading flights…</p>
+        <button className="icon-btn menu-fab hud__chip" onClick={() => setSidebarOpen(true)} aria-label="Open navigation">
+          <Icon d={I.menu} size={16} />
+        </button>
+
+        {selected && (
+          <DetailPanel flight={selected} onClose={() => setSelected(null)} />
+        )}
+
+        <div className="hud">
+          <div className="hud__chip">
+            <i className="live-dot" />
+            {error ? 'Signal lost' : 'Live operations'}
+          </div>
+          <div className="zoom">
+            <button type="button" onClick={() => mapApi.current?.zoomIn()}>+</button>
+            <button type="button" onClick={() => mapApi.current?.zoomOut()}>−</button>
+          </div>
+        </div>
+
+        <div className="flight-strip">
+          {loading && <p className="mono" style={{ color: '#555', fontSize: 12, padding: 12 }}>Acquiring tracks…</p>}
+          {!loading && visible.length === 0 && (
+            <p className="mono" style={{ color: '#555', fontSize: 12, padding: 12 }}>No matching flights.</p>
           )}
-          {!loading && flights.length === 0 && (
-            <p style={{ color: '#555', fontSize: 12, padding: '14px 0' }}>No flights found. Check your API key.</p>
-          )}
-          {flights.map(f => (
+          {visible.map((f) => (
             <FlightCard
-              key={f.id}
+              key={f.uid}
               flight={f}
-              onClick={() => setSelected(f.id === selectedId ? null : f.id)}
+              selected={f.uid === selectedId}
+              onClick={() => setSelected(f.uid)}
             />
-          ))}
-        </div>
-
-        {/* Top-right view label */}
-        <div style={{
-          position: 'absolute', top: 14, right: 14, zIndex: 10,
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: 'rgba(28,28,31,0.85)', backdropFilter: 'blur(8px)',
-          border: '1px solid #2a2a2e', borderRadius: 8, padding: '7px 12px',
-        }}>
-          <span style={{ fontSize: 12, color: '#aaa' }}>Default View</span>
-          <span style={{ color: '#555' }}>▾</span>
-        </div>
-
-        {/* Zoom controls */}
-        <div style={{
-          position: 'absolute', top: 54, right: 14, zIndex: 10,
-          display: 'flex', flexDirection: 'column', gap: 2,
-        }}>
-          {['+', '−'].map((icon, i) => (
-            <button key={i} style={{
-              width: 32, height: 32,
-              background: 'rgba(28,28,31,0.85)', backdropFilter: 'blur(8px)',
-              border: '1px solid #2a2a2e',
-              borderRadius: i === 0 ? '7px 7px 3px 3px' : '3px 3px 7px 7px',
-              color: '#888', fontSize: 18, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>{icon}</button>
           ))}
         </div>
       </div>

@@ -1,0 +1,36 @@
+export const AIRPORTS = {
+  DEL: { lat: 28.5562, lng: 77.1000, city: 'Delhi', tz: 'IST' },
+  BOM: { lat: 19.0896, lng: 72.8656, city: 'Mumbai', tz: 'IST' },
+  BLR: { lat: 13.1986, lng: 77.7066, city: 'Bengaluru', tz: 'IST' },
+  HYD: { lat: 17.2403, lng: 78.4294, city: 'Hyderabad', tz: 'IST' },
+  MAA: { lat: 12.9941, lng: 80.1709, city: 'Chennai', tz: 'IST' },
+  CCU: { lat: 22.6520, lng: 88.4463, city: 'Kolkata', tz: 'IST' },
+  AMD: { lat: 23.0772, lng: 72.6347, city: 'Ahmedabad', tz: 'IST' },
+  GOI: { lat: 15.3808, lng: 73.8314, city: 'Goa', tz: 'IST' },
+  COK: { lat: 10.1520, lng: 76.4019, city: 'Kochi', tz: 'IST' },
+  PNQ: { lat: 18.5822, lng: 73.9197, city: 'Pune', tz: 'IST' },
+  JAI: { lat: 26.8242, lng: 75.8122, city: 'Jaipur', tz: 'IST' },
+  LKO: { lat: 26.7606, lng: 80.8893, city: 'Lucknow', tz: 'IST' },
+  PAT: { lat: 25.5913, lng: 85.0880, city: 'Patna', tz: 'IST' },
+  IXC: { lat: 30.6735, lng: 76.7885, city: 'Chandigarh', tz: 'IST' },
+  GAU: { lat: 26.1061, lng: 91.5859, city: 'Guwahati', tz: 'IST' },
+  TRV: { lat: 8.4821, lng: 76.9200, city: 'Thiruvananthapuram', tz: 'IST' },
+  IXB: { lat: 26.6812, lng: 88.3286, city: 'Bagdogra', tz: 'IST' },
+  SXR: { lat: 33.9871, lng: 74.7741, city: 'Srinagar', tz: 'IST' },
+  NAG: { lat: 21.0922, lng: 79.0472, city: 'Nagpur', tz: 'IST' },
+  LHR: { lat: 51.4700, lng: -0.4543, city: 'London', tz: 'GMT' },
+  DXB: { lat: 25.2532, lng: 55.3657, city: 'Dubai', tz: 'GST' },
+  SIN: { lat: 1.3644, lng: 103.9915, city: 'Singapore', tz: 'SGT' },
+  BKK: { lat: 13.6900, lng: 100.7501, city: 'Bangkok', tz: 'ICT' },
+  DOH: { lat: 25.2731, lng: 51.6080, city: 'Doha', tz: 'AST' },
+  FRA: { lat: 50.0379, lng: 8.5622, city: 'Frankfurt', tz: 'CET' },
+  JFK: { lat: 40.6413, lng: -73.7781, city: 'New York', tz: 'EST' },
+  SFO: { lat: 37.6213, lng: -122.3790, city: 'San Francisco', tz: 'PST' },
+  HKG: { lat: 22.3080, lng: 113.9185, city: 'Hong Kong', tz: 'HKT' },
+  KUL: { lat: 2.7456, lng: 101.7099, city: 'Kuala Lumpur', tz: 'MYT' },
+  SYD: { lat: -33.9399, lng: 151.1753, city: 'Sydney', tz: 'AEST' },
+}
+
+export function airportOf(code) {
+  return AIRPORTS[code] || null
+}

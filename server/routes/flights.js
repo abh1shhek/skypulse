@@ -7,15 +7,15 @@ router.get('/', async (req, res) => {
 
   const params = {
     access_key: process.env.AVIATIONSTACK_KEY,
-    limit: 10,
+    limit: 20,
   };
 
   if (flight_iata) params.flight_iata = flight_iata;
   if (dep_iata)    params.dep_iata    = dep_iata;
   if (arr_iata)    params.arr_iata    = arr_iata;
 
-  console.log('→ KEY being used:', process.env.AVIATIONSTACK_KEY ? 'present' : 'MISSING');
-  console.log('→ Params:', params);
+  console.log('→ Aviationstack key:', process.env.AVIATIONSTACK_KEY ? 'present' : 'MISSING');
+  console.log('→ Query:', { flight_iata, dep_iata, arr_iata, limit: params.limit });
 
   try {
     const response = await axios.get(
@@ -30,7 +30,10 @@ router.get('/', async (req, res) => {
       callsign: f.flight?.icao   || 'N/A',
       airline:  f.airline?.name  || 'Unknown',
       aircraft: f.aircraft?.iata || f.aircraft?.icao || 'N/A',
+      registration: f.aircraft?.registration || null,
       status:   f.flight_status  || 'unknown',
+      gate:     f.departure?.gate || f.arrival?.gate || null,
+      terminal: f.departure?.terminal || null,
       from:     f.departure?.iata    || '',
       fromCity: f.departure?.airport || '',
       fromTz:   f.departure?.timezone || '',
