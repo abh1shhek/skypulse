@@ -11,7 +11,7 @@ const COLORS = {
   'Air Arabia': '#ed1c24',
 }
 
-export default function FlightCard({ flight, selected, onClick }) {
+export default function FlightCard({ flight, selected, onClick, followed = false }) {
   const color = COLORS[flight.airline] || '#3a3a42'
   const initials = (flight.airline || '??').slice(0, 2).toUpperCase()
   const st = statusMeta(flight.status)
@@ -36,7 +36,7 @@ export default function FlightCard({ flight, selected, onClick }) {
       </div>
 
       <div className="fcard__foot">
-        <span style={{ fontSize: 10, color: '#5c5c56' }}>Most tracked</span>
+        <span style={{ fontSize: 10, color: followed ? '#c4843a' : '#5c5c56' }}>{followed ? 'Following' : 'Most tracked'}</span>
         <div className="status">
           <i className={`status-dot ${st.tone === 'warn' ? 'warn' : ''}`} />
           {st.label === 'En route' ? 'Live' : st.label}

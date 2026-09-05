@@ -11,6 +11,8 @@ const useFlightStore = create((set, get) => ({
   query: '',
   nav: 'tracking.orders',
   sidebarOpen: false,
+  followed: {},
+  toggleFollow: (id) => set((state) => ({ followed: { ...state.followed, [id]: !state.followed[id] } })),
 
   fetchFlights: async (params = { dep_iata: 'DEL' }) => {
     set({ loading: true, error: null })
