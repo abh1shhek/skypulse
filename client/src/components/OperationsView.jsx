@@ -1,12 +1,12 @@
 import FlightCard from './FlightCard'
 
 const labels = {
-  messages: ['Messages', 'Operational communications will appear here when connected.'],
-  payments: ['Payments', 'Payment history is not connected in this operations workspace.'],
-  history: ['History', 'Past tracking sessions will appear here.'],
-  smart: ['Smart Routes', 'Route recommendations will appear as more flight data is available.'],
-  settings: ['Settings', 'Workspace settings are ready for your team configuration.'],
-  support: ['Support', 'Need help? Contact your operations administrator.'],
+  messages: { title: 'Messages', description: 'Operational communications and flight alerts will collect here.' },
+  payments: { title: 'Payments', description: 'Manage plan billing, invoices, and workspace payment methods.' },
+  history: { title: 'History', description: 'Review past tracking sessions, routes, and operational events.' },
+  smart: { title: 'Smart Routes', description: 'Compare route patterns and discover more efficient flight paths.' },
+  settings: { title: 'Settings', description: 'Configure workspace preferences, alerts, and team access.' },
+  support: { title: 'Support', description: 'Find guidance and contact the team behind your operations workspace.' },
 }
 
 function Header({ eyebrow, title, detail }) {
@@ -27,8 +27,8 @@ export default function OperationsView({ nav, flights, selectedId, onSelect, new
   if (nav === 'tracking.active') return <main className="ops-view"><Header eyebrow="Tracking / live" title="Active Routes" detail="Flights currently moving through the network." /><FlightList flights={active} selectedId={selectedId} onSelect={onSelect} /></main>
   if (nav === 'tracking.popular') return <main className="ops-view"><Header eyebrow="Tracking / pulse" title="Popular Routes" detail="The routes attracting the most current activity." /><FlightList flights={popular} selectedId={selectedId} onSelect={onSelect} /></main>
   if (nav === 'tracking.weather') return <main className="ops-view"><Header eyebrow="Tracking / conditions" title="Weather" detail="Weather monitoring is based on current route visibility." /><div className="ops-empty"><strong>Clear operational picture</strong><span>Live weather overlays will be added when the aviation feed exposes conditions.</span></div></main>
-  const copy = labels[nav] || ['Operations', 'Choose a section from the navigation rail.']
-  return <main className="ops-view"><Header eyebrow="Workspace" title={copy[0]} detail={copy[1]} /><div className="ops-empty"><strong>Section ready</strong><span>This workspace is intentionally quiet until its data connection is enabled.</span></div></main>
+  const copy = labels[nav] || { title: 'Operations', description: 'Choose a section from the navigation rail.' }
+  return <main className="ops-view"><Header eyebrow="Workspace" title={copy.title} detail={copy.description} /><div className="ops-empty"><strong>{copy.title} workspace ready</strong><span>This workspace is intentionally quiet until its data connection is enabled.</span></div></main>
 }
 
 export { FlightList }

@@ -42,7 +42,7 @@ function nearestFlight(map, latlng, flights) {
   return bestD < 36 ? best : null
 }
 
-export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
+export default function MapCanvas({ flights, selectedId, routeExpanded = false, onSelect, onReady }) {
   const mapRef = useRef(null)
   const instanceRef = useRef(null)
   const markersRef = useRef({})
@@ -87,6 +87,10 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     readyCbRef.current?.({
       zoomIn: () => map.zoomIn(),
       zoomOut: () => map.zoomOut(),
+      focusRoute: () => {
+        const flight = flightsRef.current.find((item) => item.uid === selectedId)
+        if (flight?.origin && flight?.dest) map.fitBounds([[flight.origin.lat, flight.origin.lng], [flight.dest.lat, flight.dest.lng]], { padding: [80, 80], duration: 0.85 })
+      },
     })
     setMapReady(true)
     requestAnimationFrame(() => map.invalidateSize())
@@ -153,12 +157,12 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     const now = [f.lat, f.lng]
     const to = [f.dest.lat, f.dest.lng]
     const group = L.layerGroup()
-    L.polyline([from, now, to], { color: 'rgba(255,255,255,0.12)', weight: 1.2, dashArray: '2 7' }).addTo(group)
-    L.polyline([from, now], { color: '#c4843a', weight: 2, opacity: 0.9 }).addTo(group)
+    L.polyline([from, now, to], { color: routeExpanded ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.12)', weight: routeExpanded ? 2 : 1.2, dashArray: routeExpanded ? '5 7' : '2 7', className: 'route-preview' }).addTo(group)
+    L.polyline([from, now], { color: '#c4843a', weight: routeExpanded ? 3 : 2, opacity: 0.95, className: 'route-flown' }).addTo(group)
     group.addTo(map)
     routeRef.current = group
     map.flyTo(now, Math.max(map.getZoom(), 5.4), { duration: 0.85 })
-  }, [selectedId, mapReady])
+  }, [selectedId, routeExpanded, mapReady])
 
   return <div ref={mapRef} className="ops-map" />
 }
