@@ -5,7 +5,7 @@ import AnimatedNumber from './AnimatedNumber'
 import { I, Icon, PlaneGlyph } from './icons'
 import RouteArc from './RouteArc'
 
-export default function DetailPanel({ flight, onClose }) {
+export default function DetailPanel({ flight, onClose, followed, onFollow, onRoute, onShare, shareState }) {
   const [ready, setReady] = useState(false)
   useEffect(() => {
     setReady(false)
@@ -107,9 +107,9 @@ export default function DetailPanel({ flight, onClose }) {
         </div>
       </div>
       <div className="detail__actions">
-        <button type="button">Route</button>
-        <button type="button">Follow</button>
-        <button type="button">Share</button>
+        <button type="button" onClick={onRoute}>Route</button>
+        <button type="button" className={followed ? 'is-active' : ''} onClick={onFollow}>{followed ? 'Following' : 'Follow'}</button>
+        <button type="button" onClick={onShare}>{shareState || 'Share'}</button>
       </div>
     </section>
   )
