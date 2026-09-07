@@ -51,11 +51,15 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
   const onSelectRef = useRef(onSelect)
   const readyCbRef = useRef(onReady)
   const flightsRef = useRef(flights)
+  const selectedIdRef = useRef(selectedId)
+  const highlightTimeoutRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
+  const [routeHighlight, setRouteHighlight] = useState(false)
 
   onSelectRef.current = onSelect
   readyCbRef.current = onReady
   flightsRef.current = flights
+  selectedIdRef.current = selectedId
 
   useEffect(() => {
     if (instanceRef.current || !mapRef.current) return
@@ -84,9 +88,21 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       if (hit) onSelectRef.current(hit.uid)
     })
 
-    readyCbRef.current?.({
+        readyCbRef.current?.({
       zoomIn: () => map.zoomIn(),
       zoomOut: () => map.zoomOut(),
+      focusRoute: () => {
+        const f = flightsRef.current.find((fl) => fl.uid === selectedIdRef.current)
+        if (!f?.origin || !f?.dest) return
+        const bounds = L.latLngBounds(
+          [f.origin.lat, f.origin.lng],
+          [f.dest.lat, f.dest.lng]
+        )
+        map.flyToBounds(bounds, { padding: [96, 96], maxZoom: 7, duration: 1 })
+        setRouteHighlight(true)
+        if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current)
+        highlightTimeoutRef.current = setTimeout(() => setRouteHighlight(false), 1600)
+      },
     })
     setMapReady(true)
     requestAnimationFrame(() => map.invalidateSize())
@@ -96,6 +112,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       instanceRef.current = null
       markersRef.current = {}
       routeRef.current = null
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current)
     }
   }, [])
 
@@ -140,7 +157,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     })
   }, [flights, selectedId, mapReady])
 
-  useEffect(() => {
+    useEffect(() => {
     const map = instanceRef.current
     if (!mapReady || !map) return
     if (routeRef.current) {
@@ -153,12 +170,24 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     const now = [f.lat, f.lng]
     const to = [f.dest.lat, f.dest.lng]
     const group = L.layerGroup()
-    L.polyline([from, now, to], { color: 'rgba(255,255,255,0.12)', weight: 1.2, dashArray: '2 7' }).addTo(group)
-    L.polyline([from, now], { color: '#c4843a', weight: 2, opacity: 0.9 }).addTo(group)
+    L.polyline([from, now, to], {
+      color: routeHighlight ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
+      weight: routeHighlight ? 1.6 : 1.2,
+      dashArray: '2 7',
+      className: routeHighlight ? 'route-line--focus' : '',
+    }).addTo(group)
+    L.polyline([from, now], {
+      color: '#c4843a',
+      weight: routeHighlight ? 3.4 : 2,
+      opacity: routeHighlight ? 1 : 0.9,
+      className: routeHighlight ? 'route-line--focus' : '',
+    }).addTo(group)
     group.addTo(map)
     routeRef.current = group
-    map.flyTo(now, Math.max(map.getZoom(), 5.4), { duration: 0.85 })
-  }, [selectedId, mapReady])
+    if (!routeHighlight) {
+      map.flyTo(now, Math.max(map.getZoom(), 5.4), { duration: 0.85 })
+    }
+  }, [selectedId, mapReady, routeHighlight])
 
   return <div ref={mapRef} className="ops-map" />
 }
