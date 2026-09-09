@@ -17,6 +17,10 @@
   --warn: #c9a15b;
   --alert: #c45c4a;
   --shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --glass: rgba(23, 23, 26, 0.72);
+  --glass-strong: rgba(20, 20, 23, 0.82);
+  --glass-line: rgba(255, 255, 255, 0.1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 }
@@ -24,6 +28,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root { height: 100%; }
+html { scroll-behavior: smooth; }
 
 body {
   background: var(--bg);
@@ -182,11 +187,12 @@ button, input { font-family: inherit; }
   text-align: left;
   border-radius: 8px;
   padding: 8px 10px;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s var(--ease-out);
 }
 
 .nav-item svg { opacity: 0.7; }
 .nav-item:hover, .nav-sub:hover { color: #cfcfd4; background: rgba(255,255,255,0.03); }
+.nav-item:active, .nav-sub:active { transform: scale(0.98); }
 .nav-item.is-active {
   color: #fff;
   background: #1c1c21;
