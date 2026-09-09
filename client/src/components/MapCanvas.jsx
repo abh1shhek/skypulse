@@ -116,47 +116,6 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     }
   }, [])
 
-  useEffect(() => {
-    const map = instanceRef.current
-    if (!mapReady || !map) return
-
-    const seen = new Set()
-    flights.forEach((f) => {
-      if (f.lat == null || f.lng == null) return
-      seen.add(f.uid)
-      const pos = [f.lat, f.lng]
-      const existing = markersRef.current[f.uid]
-      const iconKey = `${f.uid}:${selectedId === f.uid}`
-      if (existing) {
-        existing.setLatLng(pos)
-        if (iconStateRef.current[f.uid] !== iconKey) {
-          existing.setIcon(makeIcon(f, selectedId))
-          iconStateRef.current[f.uid] = iconKey
-        }
-      } else {
-        const marker = L.marker(pos, {
-          icon: makeIcon(f, selectedId),
-          riseOnHover: true,
-          keyboard: true,
-        }).addTo(map)
-        marker.on('click', (ev) => {
-          L.DomEvent.stopPropagation(ev)
-          onSelectRef.current(f.uid)
-        })
-        markersRef.current[f.uid] = marker
-        iconStateRef.current[f.uid] = iconKey
-      }
-    })
-
-    Object.entries(markersRef.current).forEach(([id, marker]) => {
-      if (!seen.has(id)) {
-        map.removeLayer(marker)
-        delete markersRef.current[id]
-        delete iconStateRef.current[id]
-      }
-    })
-  }, [flights, selectedId, mapReady])
-
     useEffect(() => {
     const map = instanceRef.current
     if (!mapReady || !map) return
