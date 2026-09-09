@@ -684,13 +684,13 @@ button, input { font-family: inherit; }
     -webkit-backdrop-filter: blur(4px);
   }
   .menu-fab { display: grid; place-items: center; }
-  .detail {
+    .detail {
     left: 10px;
     right: 10px;
     top: auto;
     bottom: 16px;
     width: auto;
-    max-height: 78vh;
+    max-height: 52vh;
     border-radius: 16px 16px 14px 14px;
     animation: sheet-in 0.38s cubic-bezier(0.22,1,0.36,1) both;
   }
