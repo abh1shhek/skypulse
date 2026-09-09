@@ -672,23 +672,41 @@ button, input { font-family: inherit; }
 @media (max-width: 1024px) {
   .rail {
     position: absolute;
+    width: min(84vw, 300px);
     transform: translateX(-105%);
   }
   .rail.is-open { transform: none; }
   .rail-backdrop {
     display: block;
     position: fixed;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
   .menu-fab { display: grid; place-items: center; }
   .detail {
     left: 10px;
     right: 10px;
     top: auto;
-    bottom: 118px;
+    bottom: 16px;
     width: auto;
-    max-height: 48vh;
+    max-height: 78vh;
+    border-radius: 16px 16px 14px 14px;
     animation: sheet-in 0.38s cubic-bezier(0.22,1,0.36,1) both;
   }
+  .detail::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+  }
+  .detail__head { padding-top: 18px; }
+  .ops-stage:has(.detail) .flight-strip { display: none; }
   .flight-strip { left: 10px; right: 10px; bottom: 12px; }
   .hud { top: 16px; }
 }
