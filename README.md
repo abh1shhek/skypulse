@@ -101,7 +101,4 @@ npm run dev                # http://localhost:5173, proxies /api -> :8000
 - Persist and replay historical flight paths
 - Unit tests around the flight-math and enrichment utilities
 - Auth + saved/favorited flights per user
-  
-## License
- 
-MIT
+
