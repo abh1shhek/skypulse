@@ -93,8 +93,8 @@ export default function Sidebar() {
                 aria-current={isActive(nav, item.id) ? 'page' : undefined}
                 onClick={() => go(item.id)}
               >
-                <Icon d={item.icon} size={15} />
-                {item.label}
+                <Icon d={item.icon} size={item.primary ? 16 : 15} />
+                <span>{item.label}</span>
               </button>
             ))}
           </div>

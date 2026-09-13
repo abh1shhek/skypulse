@@ -211,12 +211,13 @@ button, input { font-family: inherit; }
   text-align: left;
   border-radius: 6px;
   padding: 8px 10px;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  outline: none;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .nav-item svg { opacity: 0.65; flex-shrink: 0; }
-.nav-item:hover { color: #d4d4ce; background: rgba(255,255,255,0.035); }
-.nav-item:active { transform: scale(0.985); }
+.nav-item:hover { color: #d8d8d2; background: rgba(255,255,255,0.04); }
+.nav-item:active { transform: none; background: rgba(255,255,255,0.06); }
 .nav-item.is-active {
   color: var(--text);
   background: #1c1c20;
@@ -224,20 +225,50 @@ button, input { font-family: inherit; }
 }
 .nav-item.is-active svg { opacity: 1; color: var(--text); }
 
-.nav-item--primary {
-  font-weight: 500;
-  color: #b8b8b2;
+.nav-item:focus-visible,
+.btn-primary:focus-visible,
+.rail__search:focus-within,
+.brief__item:focus-visible {
+  outline: 1px solid rgba(196, 132, 58, 0.65);
+  outline-offset: 1px;
 }
 
-.nav-item--primary svg { opacity: 0.85; }
+.nav-item--primary {
+  font-weight: 600;
+  color: #c8c8c2;
+  padding: 9px 10px;
+  letter-spacing: -0.015em;
+}
+
+.nav-item--primary svg { opacity: 0.9; }
+
+.nav-item--primary:hover:not(.is-active) {
+  color: #eeeae4;
+  background: rgba(196, 132, 58, 0.07);
+  border-color: rgba(196, 132, 58, 0.18);
+}
 
 .nav-item--primary.is-active {
-  color: var(--text);
-  background: #1e1c19;
-  border-color: rgba(196, 132, 58, 0.38);
+  color: #f3efe8;
+  background: #201c18;
+  border-color: rgba(196, 132, 58, 0.42);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
-.nav-item--primary.is-active svg { color: var(--accent-2); }
+.nav-item--primary.is-active svg { color: var(--accent-2); opacity: 1; }
+
+.rail__foot .nav-item {
+  color: #5e5e5a;
+  font-size: 12.5px;
+}
+
+.rail__foot .nav-item:hover { color: #c8c8c2; }
+.rail__foot .nav-item.is-active {
+  color: var(--text);
+  background: #1c1c20;
+}
+
+.btn-primary:focus-visible { outline-offset: 2px; }
 
 .rail__foot {
   border-top: 1px solid var(--line);
