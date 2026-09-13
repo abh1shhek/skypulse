@@ -43,6 +43,30 @@ function airportIcon(code, kind) {
   })
 }
 
+function toFeet(meters) {
+  return Math.round((Number(meters) || 0) * 3.28084)
+}
+
+function hudIcon(flight) {
+  const id = String(flight.id || '').replace(/[<>&]/g, '')
+  const alt = toFeet(flight.alt).toLocaleString()
+  const spd = Math.round(flight.speed || 0).toLocaleString()
+  return L.divIcon({
+    html: `<div class="ac-hud">
+      <strong>${id}</strong>
+      <span>${alt} ft</span>
+      <span>${spd} km/h</span>
+    </div>`,
+    className: 'ac-hud-icon',
+    iconSize: [92, 52],
+    iconAnchor: [-16, 26],
+  })
+}
+
+function hudKey(flight) {
+  return `${flight.id}:${Math.round((flight.alt || 0) / 40)}:${Math.round((flight.speed || 0) / 12)}`
+}
+
 function iconKey(flight, selected) {
   return `${selected ? 1 : 0}:${Math.round((flight.bearing || 0) / 2)}`
 }
@@ -73,15 +97,18 @@ function splitRoute(origin, dest, progress) {
   }
 }
 
-export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
+export default function MapCanvas({ flights, selectedId, onSelect, onReady, follow = false, onFollowChange }) {
   const mapRef = useRef(null)
   const instanceRef = useRef(null)
   const markersRef = useRef({})
   const iconStateRef = useRef({})
   const routeRef = useRef(null)
+  const hudRef = useRef(null)
   const onSelectRef = useRef(onSelect)
   const readyCbRef = useRef(onReady)
   const selectedIdRef = useRef(selectedId)
+  const followRef = useRef(follow)
+  const onFollowChangeRef = useRef(onFollowChange)
   const highlightTimeoutRef = useRef(null)
   const lastFitRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
@@ -90,6 +117,8 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
   useEffect(() => { readyCbRef.current = onReady }, [onReady])
   useEffect(() => { selectedIdRef.current = selectedId }, [selectedId])
+  useEffect(() => { followRef.current = follow }, [follow])
+  useEffect(() => { onFollowChangeRef.current = onFollowChange }, [onFollowChange])
 
   useEffect(() => {
     if (instanceRef.current || !mapRef.current) return
@@ -113,6 +142,9 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       { maxZoom: 19 }
     ).addTo(map)
 
+    map.on('dragstart', () => {
+      if (followRef.current) onFollowChangeRef.current?.(false)
+    })
     map.on('click', (e) => {
       const hit = nearestFlight(map, e.latlng, Object.values(markersRef.current).map((m) => m._flight).filter(Boolean))
       if (hit) onSelectRef.current(hit.uid)
@@ -122,6 +154,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       zoomIn: () => map.zoomIn(),
       zoomOut: () => map.zoomOut(),
       focusRoute: () => {
+        onFollowChangeRef.current?.(false)
         const f = Object.values(markersRef.current).find((m) => m._flight?.uid === selectedIdRef.current)?._flight
         if (!f?.origin || !f?.dest) return
         const bounds = L.latLngBounds(
@@ -142,6 +175,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       instanceRef.current = null
       markersRef.current = {}
       routeRef.current = null
+      hudRef.current = null
       if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current)
     }
   }, [])
@@ -194,28 +228,41 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
         map.removeLayer(routeRef.current.group)
         routeRef.current = null
       }
+      if (hudRef.current) {
+        map.removeLayer(hudRef.current.marker)
+        hudRef.current = null
+      }
       return
     }
 
     const { flown, remain } = splitRoute(selected.origin, selected.dest, selected.progress)
+    const path = flown.concat(remain.slice(1))
     const from = [selected.origin.lat, selected.origin.lng]
     const to = [selected.dest.lat, selected.dest.lng]
-    const accent = routeHighlight ? 1 : 0.92
-    const remainOp = routeHighlight ? 0.7 : 0.5
+    const accent = routeHighlight ? 1 : 0.95
+    const remainOp = routeHighlight ? 0.55 : 0.38
 
     if (!routeRef.current) {
       const group = L.layerGroup()
-      const remainLine = L.polyline(remain, {
-        color: '#c4843a',
-        weight: 1.7,
-        opacity: remainOp,
-        dashArray: '5 8',
+      const halo = L.polyline(path, {
+        color: '#050506',
+        weight: 6,
+        opacity: 0.4,
         lineCap: 'round',
+        interactive: false,
+      }).addTo(group)
+      const remainLine = L.polyline(remain, {
+        color: '#8d7352',
+        weight: 1.6,
+        opacity: remainOp,
+        dashArray: '4 9',
+        lineCap: 'round',
+        className: 'route-remain',
         interactive: false,
       }).addTo(group)
       const flownLine = L.polyline(flown, {
         color: '#c4843a',
-        weight: routeHighlight ? 3 : 2.2,
+        weight: routeHighlight ? 3.1 : 2.4,
         opacity: accent,
         lineCap: 'round',
         interactive: false,
@@ -233,13 +280,14 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
         zIndexOffset: 200,
       }).addTo(group)
       group.addTo(map)
-      routeRef.current = { group, remainLine, flownLine, originM, destM, from: selected.from, to: selected.to }
+      routeRef.current = { group, halo, remainLine, flownLine, originM, destM, from: selected.from, to: selected.to }
     } else {
       const layer = routeRef.current
+      layer.halo.setLatLngs(path)
       layer.remainLine.setLatLngs(remain)
-      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 2 : 1.7 })
+      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 1.9 : 1.6 })
       layer.flownLine.setLatLngs(flown)
-      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 3 : 2.2 })
+      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 3.1 : 2.4 })
       layer.originM.setLatLng(from)
       layer.destM.setLatLng(to)
       if (layer.from !== selected.from) {
@@ -252,12 +300,35 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       }
     }
 
-    if (lastFitRef.current !== selectedId && !routeHighlight) {
+    const here = [selected.lat, selected.lng]
+    const hk = hudKey(selected)
+    if (!hudRef.current) {
+      hudRef.current = {
+        marker: L.marker(here, {
+          icon: hudIcon(selected),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 850,
+        }).addTo(map),
+        key: hk,
+      }
+    } else {
+      hudRef.current.marker.setLatLng(here)
+      if (hudRef.current.key !== hk) {
+        hudRef.current.marker.setIcon(hudIcon(selected))
+        hudRef.current.key = hk
+      }
+    }
+
+    if (follow) {
+      map.panTo(here, { animate: true, duration: 0.28, easeLinearity: 0.35 })
       lastFitRef.current = selectedId
-      const bounds = L.latLngBounds(from, to).extend([selected.lat, selected.lng])
+    } else if (lastFitRef.current !== selectedId && !routeHighlight) {
+      lastFitRef.current = selectedId
+      const bounds = L.latLngBounds(from, to).extend(here)
       map.flyToBounds(bounds, { padding: [88, 88], maxZoom: 6.2, duration: 0.85 })
     }
-  }, [flights, selectedId, mapReady, routeHighlight])
+  }, [flights, selectedId, mapReady, routeHighlight, follow])
 
   return <div ref={mapRef} className="ops-map" />
 }

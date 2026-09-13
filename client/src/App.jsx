@@ -31,6 +31,7 @@ export default function App() {
 
   const mapApi = useRef(null)
   const [shareState, setShareState] = useState('')
+  const [mapFollow, setMapFollow] = useState(true)
   const selected = flights.find((f) => f.uid === selectedId)
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -100,6 +101,11 @@ export default function App() {
     }
   }
 
+  const selectFlight = (id) => {
+    setSelected(id)
+    setMapFollow(true)
+  }
+
   const live = nav === 'tracking'
 
   return (
@@ -119,7 +125,9 @@ export default function App() {
             <MapCanvas
               flights={visible}
               selectedId={selectedId}
-              onSelect={setSelected}
+              onSelect={selectFlight}
+              follow={mapFollow}
+              onFollowChange={setMapFollow}
               onReady={(api) => { mapApi.current = api }}
             />
             <div className="map-vignette" />
@@ -153,9 +161,19 @@ export default function App() {
                 <i className="live-dot" />
                 {error ? 'Signal lost — retry' : 'Live operations'}
               </button>
-              <div className="zoom">
-                <button type="button" onClick={() => mapApi.current?.zoomIn()} aria-label="Zoom in">+</button>
-                <button type="button" onClick={() => mapApi.current?.zoomOut()} aria-label="Zoom out">−</button>
+              <div className="map-tools">
+                <div className="zoom">
+                  <button type="button" onClick={() => mapApi.current?.zoomIn()} aria-label="Zoom in">+</button>
+                  <button type="button" onClick={() => mapApi.current?.zoomOut()} aria-label="Zoom out">−</button>
+                </div>
+                <button
+                  type="button"
+                  className={`map-follow ${mapFollow ? 'is-on' : ''}`}
+                  aria-pressed={mapFollow}
+                  onClick={() => setMapFollow((on) => !on)}
+                >
+                  Follow
+                </button>
               </div>
             </div>
             <div className="flight-strip">
@@ -171,7 +189,7 @@ export default function App() {
                   flight={f}
                   followed={Boolean(followed[f.uid])}
                   selected={f.uid === selectedId}
-                  onClick={() => setSelected(f.uid)}
+                  onClick={() => selectFlight(f.uid)}
                 />
               ))}
             </div>
