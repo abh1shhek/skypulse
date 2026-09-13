@@ -9,7 +9,7 @@ const useFlightStore = create((set, get) => ({
   loading: false,
   error: null,
   query: '',
-  nav: 'tracking.orders',
+  nav: 'tracking',
   sidebarOpen: false,
   followed: {},
   toggleFollow: (id) => set((state) => ({ followed: { ...state.followed, [id]: !state.followed[id] } })),

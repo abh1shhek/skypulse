@@ -1,10 +1,6 @@
 import FlightCard from './FlightCard'
 
 const labels = {
-  messages: ['Messages', 'Operational communications will appear here when connected.'],
-  payments: ['Payments', 'Payment history is not connected in this operations workspace.'],
-  history: ['History', 'Past tracking sessions will appear here.'],
-  smart: ['Smart Routes', 'Route recommendations will appear as more flight data is available.'],
   settings: ['Settings', 'Workspace settings are ready for your team configuration.'],
   support: ['Support', 'Need help? Contact your operations administrator.'],
 }

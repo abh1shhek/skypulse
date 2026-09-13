@@ -1,29 +1,41 @@
 import useFlightStore from '../store/useFlightStore'
 import { I, Icon } from './icons'
 
-const PRIMARY = [
-  { id: 'overview', label: 'Overview', icon: I.grid },
-  { id: 'tracking', label: 'Live Tracking', icon: I.radar },
-]
-
-const TRACKING = [
-  { id: 'tracking.orders', label: 'My Flights' },
-  { id: 'tracking.active', label: 'Active Routes' },
-  { id: 'tracking.popular', label: 'Popular Routes' },
-  { id: 'tracking.weather', label: 'Weather' },
-]
-
-const SECONDARY = [
-  { id: 'messages', label: 'Messages', icon: I.message },
-  { id: 'payments', label: 'Payments', icon: I.card },
-  { id: 'history', label: 'History', icon: I.clock },
-  { id: 'smart', label: 'Smart Routes', icon: I.spark },
+const GROUPS = [
+  {
+    id: 'core',
+    label: 'Core',
+    items: [
+      { id: 'overview', label: 'Overview', icon: I.grid },
+      { id: 'tracking', label: 'Live Tracking', icon: I.radar, primary: true },
+    ],
+  },
+  {
+    id: 'mine',
+    label: 'My flights',
+    items: [
+      { id: 'tracking.orders', label: 'My Flights', icon: I.plane },
+      { id: 'tracking.active', label: 'Active Routes', icon: I.route },
+    ],
+  },
+  {
+    id: 'discover',
+    label: 'Discover',
+    items: [
+      { id: 'tracking.popular', label: 'Popular Routes', icon: I.star },
+      { id: 'tracking.weather', label: 'Weather', icon: I.cloud },
+    ],
+  },
 ]
 
 const FOOT = [
   { id: 'settings', label: 'Settings', icon: I.gear },
   { id: 'support', label: 'Support', icon: I.help },
 ]
+
+function isActive(nav, id) {
+  return nav === id
+}
 
 export default function Sidebar() {
   const { query, setQuery, nav, setNav, sidebarOpen, setSidebarOpen, setSelected, flights, news } = useFlightStore()
@@ -34,9 +46,9 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={`rail ${sidebarOpen ? 'is-open' : ''}`}>
+    <aside className={`rail ${sidebarOpen ? 'is-open' : ''}`} aria-label="SkyPulse">
       <div className="rail__brand">
-        <div className="rail__mark">
+        <div className="rail__mark" aria-hidden="true">
           <Icon d={I.plane} size={13} />
         </div>
         <div className="rail__name">SkyPulse</div>
@@ -48,6 +60,7 @@ export default function Sidebar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search flight, city, ICAO"
+          aria-label="Search flights"
         />
         <span className="kbd">/</span>
       </label>
@@ -56,6 +69,7 @@ export default function Sidebar() {
         className="btn-primary"
         onClick={() => {
           const first = flights[0]
+          go('tracking')
           if (first) setSelected(first.uid)
         }}
       >
@@ -63,35 +77,27 @@ export default function Sidebar() {
         Track flight
       </button>
 
-      <nav className="rail__nav">
-        {PRIMARY.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-item ${nav.startsWith(item.id) ? 'is-active' : ''}`}
-            onClick={() => go(item.id === 'tracking' ? 'tracking.orders' : item.id)}
-          >
-            <Icon d={item.icon} size={15} />
-            {item.label}
-          </button>
-        ))}
-        {TRACKING.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-sub ${nav === item.id ? 'is-active' : ''}`}
-            onClick={() => go(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-        {SECONDARY.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-item ${nav === item.id ? 'is-active' : ''}`}
-            onClick={() => go(item.id)}
-          >
-            <Icon d={item.icon} size={15} />
-            {item.label}
-          </button>
+      <nav className="rail__nav" aria-label="Main">
+        {GROUPS.map((group) => (
+          <div key={group.id} className="nav-group">
+            <p className="nav-group__label">{group.label}</p>
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={[
+                  'nav-item',
+                  item.primary ? 'nav-item--primary' : '',
+                  isActive(nav, item.id) ? 'is-active' : '',
+                ].filter(Boolean).join(' ')}
+                aria-current={isActive(nav, item.id) ? 'page' : undefined}
+                onClick={() => go(item.id)}
+              >
+                <Icon d={item.icon} size={15} />
+                {item.label}
+              </button>
+            ))}
+          </div>
         ))}
 
         {news.length > 0 && (
@@ -115,7 +121,13 @@ export default function Sidebar() {
 
       <div className="rail__foot">
         {FOOT.map((item) => (
-          <button key={item.id} className="nav-item" onClick={() => go(item.id)}>
+          <button
+            key={item.id}
+            type="button"
+            className={`nav-item ${isActive(nav, item.id) ? 'is-active' : ''}`}
+            aria-current={isActive(nav, item.id) ? 'page' : undefined}
+            onClick={() => go(item.id)}
+          >
             <Icon d={item.icon} size={15} />
             {item.label}
           </button>
