@@ -25,7 +25,16 @@ function makeIcon(flight, selectedId) {
     iconAnchor: [22, 22],
   })
 }
+function airportPinIcon(type) {
+  return L.divIcon({
+    html: `<div class="airport-pin airport-pin--${type}"><span class="airport-pin__dot"></span></div>`,
+    className: 'airport-pin-icon',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  })
+}
 
+function nearestFlight(map, latlng, flights) {
 function nearestFlight(map, latlng, flights) {
   let best = null
   let bestD = Infinity
@@ -141,6 +150,8 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       opacity: routeHighlight ? 1 : 0.9,
       className: routeHighlight ? 'route-line--focus' : '',
     }).addTo(group)
+    L.marker(from, { icon: airportPinIcon('origin'), interactive: false, keyboard: false }).addTo(group)
+    L.marker(to, { icon: airportPinIcon('dest'), interactive: false, keyboard: false }).addTo(group)
     group.addTo(map)
     routeRef.current = group
     if (!routeHighlight) {
