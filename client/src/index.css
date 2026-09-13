@@ -762,7 +762,71 @@ button, input { font-family: inherit; }
 .ops-metrics strong { display: block; font: 28px var(--mono); color: var(--accent); }
 .ops-metrics span { color: var(--muted); font-size: 12px; }
 .ops-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
-.ops-empty { display: flex; flex-direction: column; gap: 8px; margin-top: 28px; padding: 32px; background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); }
+.ops-brief-list { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ops-brief-list a { color: var(--text); text-decoration: none; font-size: 14px; }
+.ops-brief-list a:hover { color: var(--accent-2); }
+.ops-brief-list span { display: block; margin-top: 4px; font-size: 11px; color: var(--dim); font-family: var(--mono); }
+.ops-link {
+  margin-top: 16px;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ops-link:hover { border-color: var(--line-strong); }
+.ops-link:disabled { opacity: 0.4; cursor: default; }
+.ops-wx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.ops-wx { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.ops-wx strong { display: block; font-family: var(--mono); font-size: 32px; margin: 8px 0 4px; }
+.ops-wx p { color: var(--muted); font-size: 13px; }
+.ops-wx dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.ops-wx dt { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+.ops-wx dd { font-size: 14px; margin-top: 4px; }
+.ops-routes { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 8px; }
+.ops-routes button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto auto auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: inherit;
+  cursor: pointer;
+}
+.ops-routes button:hover { border-color: var(--line-strong); }
+.ops-routes .iata { font-size: 22px; }
+.ops-routes__arrow { color: var(--dim); }
+.ops-routes em { font-style: normal; font-size: 12px; color: var(--muted); }
+.ops-routes strong { font-family: var(--mono); color: var(--accent); }
+.ops-settings { display: grid; gap: 16px; margin-top: 28px; }
+.ops-settings > div { padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.ops-settings p { color: var(--muted); font-size: 13px; margin: 8px 0 0; line-height: 1.5; }
+.ops-support { list-style: none; margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+.ops-support li { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.ops-support strong { display: block; margin-bottom: 6px; }
+.ops-support span, .ops-support a { color: var(--muted); font-size: 13px; }
+.ops-support a { color: var(--accent-2); }
+.hud__chip { cursor: default; }
+.hud button.hud__chip { cursor: pointer; }
+@media (max-width: 700px) { .ops-wx-grid { grid-template-columns: 1fr; } .ops-routes button { grid-template-columns: 1fr; } }
+.ops-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+}
 .ops-empty strong { color: var(--text); font-size: 16px; }
 .detail__actions button.is-active { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {

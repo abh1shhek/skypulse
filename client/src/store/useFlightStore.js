@@ -2,6 +2,15 @@ import { create } from 'zustand'
 import { getFlights, getNews } from '../services/api'
 import { enrichFlights, tickFlight } from '../lib/enrichFlights'
 
+function readFollowed() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('skypulse.followed') || '{}')
+    return raw && typeof raw === 'object' ? raw : {}
+  } catch {
+    return {}
+  }
+}
+
 const useFlightStore = create((set, get) => ({
   flights: [],
   news: [],
@@ -11,8 +20,17 @@ const useFlightStore = create((set, get) => ({
   query: '',
   nav: 'tracking',
   sidebarOpen: false,
-  followed: {},
-  toggleFollow: (id) => set((state) => ({ followed: { ...state.followed, [id]: !state.followed[id] } })),
+  followed: typeof window === 'undefined' ? {} : readFollowed(),
+  toggleFollow: (id) => set((state) => {
+    const followed = { ...state.followed, [id]: !state.followed[id] }
+    if (!followed[id]) delete followed[id]
+    localStorage.setItem('skypulse.followed', JSON.stringify(followed))
+    return { followed }
+  }),
+  clearFollowed: () => {
+    localStorage.setItem('skypulse.followed', '{}')
+    set({ followed: {} })
+  },
 
   fetchFlights: async (params = { dep_iata: 'DEL' }) => {
     set({ loading: true, error: null })
