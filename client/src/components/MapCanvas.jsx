@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { geodesicPoints } from '../lib/flightMath'
+
+const ROUTE_STEPS = 64
 
 function planeSvg(size) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor">
@@ -8,31 +11,42 @@ function planeSvg(size) {
   </svg>`
 }
 
-function makeIcon(flight, selectedId) {
-  const selected = flight.uid === selectedId
-  const near = !selected && flight.progress > 0.35 && flight.progress < 0.75
-  const size = selected ? 20 : near ? 16 : 14
-  const cls = selected ? 'ac is-selected' : near ? 'ac is-near' : 'ac'
-  const ring = selected ? '<div class="ac-ring"></div>' : ''
-  const rot = flight.bearing || 45
+function safeCode(code) {
+  return String(code || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 4)
+}
+
+function aircraftIcon(flight, selected) {
+  const size = selected ? 22 : 14
+  const rot = Math.round(flight.bearing || 0)
+  const pulse = selected
+    ? '<span class="ac-pulse"></span><span class="ac-pulse ac-pulse--late"></span>'
+    : ''
   return L.divIcon({
-    html: `<div class="ac-wrap">
-      ${ring}
-      <div class="${cls}" style="transform:rotate(${rot}deg)">${planeSvg(size)}</div>
+    html: `<div class="ac-wrap${selected ? ' is-selected' : ''}">
+      ${pulse}
+      <span class="ac-disc"></span>
+      <div class="ac" style="transform:rotate(${rot}deg)">${planeSvg(size)}</div>
     </div>`,
     className: 'ac-icon',
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
   })
 }
-function airportPinIcon(type) {
+
+function airportIcon(code, kind) {
+  const label = safeCode(code)
   return L.divIcon({
-    html: `<div class="airport-pin airport-pin--${type}"><span class="airport-pin__dot"></span></div>`,
-    className: 'airport-pin-icon',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
+    html: `<div class="apt apt--${kind}"><span class="apt__dot"></span><span class="apt__code">${label}</span></div>`,
+    className: 'apt-icon',
+    iconSize: [78, 24],
+    iconAnchor: [5, 12],
   })
 }
+
+function iconKey(flight, selected) {
+  return `${selected ? 1 : 0}:${Math.round((flight.bearing || 0) / 2)}`
+}
+
 function nearestFlight(map, latlng, flights) {
   let best = null
   let bestD = Infinity
@@ -49,6 +63,16 @@ function nearestFlight(map, latlng, flights) {
   return bestD < 36 ? best : null
 }
 
+function splitRoute(origin, dest, progress) {
+  const pts = geodesicPoints(origin, dest, ROUTE_STEPS).map((p) => [p.lat, p.lng])
+  const t = Math.max(0.02, Math.min(0.98, progress || 0))
+  const cut = Math.max(1, Math.round(t * (pts.length - 1)))
+  return {
+    flown: pts.slice(0, cut + 1),
+    remain: pts.slice(cut),
+  }
+}
+
 export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
   const mapRef = useRef(null)
   const instanceRef = useRef(null)
@@ -57,16 +81,15 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
   const routeRef = useRef(null)
   const onSelectRef = useRef(onSelect)
   const readyCbRef = useRef(onReady)
-  const flightsRef = useRef(flights)
   const selectedIdRef = useRef(selectedId)
   const highlightTimeoutRef = useRef(null)
+  const lastFitRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const [routeHighlight, setRouteHighlight] = useState(false)
 
-  onSelectRef.current = onSelect
-  readyCbRef.current = onReady
-  flightsRef.current = flights
-  selectedIdRef.current = selectedId
+  useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
+  useEffect(() => { readyCbRef.current = onReady }, [onReady])
+  useEffect(() => { selectedIdRef.current = selectedId }, [selectedId])
 
   useEffect(() => {
     if (instanceRef.current || !mapRef.current) return
@@ -91,21 +114,21 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     ).addTo(map)
 
     map.on('click', (e) => {
-      const hit = nearestFlight(map, e.latlng, flightsRef.current)
+      const hit = nearestFlight(map, e.latlng, Object.values(markersRef.current).map((m) => m._flight).filter(Boolean))
       if (hit) onSelectRef.current(hit.uid)
     })
 
-        readyCbRef.current?.({
+    readyCbRef.current?.({
       zoomIn: () => map.zoomIn(),
       zoomOut: () => map.zoomOut(),
       focusRoute: () => {
-        const f = flightsRef.current.find((fl) => fl.uid === selectedIdRef.current)
+        const f = Object.values(markersRef.current).find((m) => m._flight?.uid === selectedIdRef.current)?._flight
         if (!f?.origin || !f?.dest) return
         const bounds = L.latLngBounds(
           [f.origin.lat, f.origin.lng],
           [f.dest.lat, f.dest.lng]
-        )
-        map.flyToBounds(bounds, { padding: [96, 96], maxZoom: 7, duration: 1 })
+        ).extend([f.lat, f.lng])
+        map.flyToBounds(bounds, { padding: [88, 88], maxZoom: 6.2, duration: 1 })
         setRouteHighlight(true)
         if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current)
         highlightTimeoutRef.current = setTimeout(() => setRouteHighlight(false), 1600)
@@ -123,39 +146,118 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
     }
   }, [])
 
-    useEffect(() => {
+  useEffect(() => {
     const map = instanceRef.current
     if (!mapReady || !map) return
-    if (routeRef.current) {
-      map.removeLayer(routeRef.current)
-      routeRef.current = null
+
+    const live = new Set()
+    flights.forEach((flight) => {
+      if (flight.lat == null || flight.lng == null) return
+      live.add(flight.uid)
+      const selected = flight.uid === selectedId
+      const key = iconKey(flight, selected)
+      let marker = markersRef.current[flight.uid]
+      if (!marker) {
+        marker = L.marker([flight.lat, flight.lng], {
+          icon: aircraftIcon(flight, selected),
+          keyboard: false,
+          zIndexOffset: selected ? 800 : 0,
+        })
+        marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e)
+          onSelectRef.current(flight.uid)
+        })
+        marker.addTo(map)
+        markersRef.current[flight.uid] = marker
+        iconStateRef.current[flight.uid] = key
+      } else {
+        marker.setLatLng([flight.lat, flight.lng])
+        if (iconStateRef.current[flight.uid] !== key) {
+          marker.setIcon(aircraftIcon(flight, selected))
+          iconStateRef.current[flight.uid] = key
+        }
+        marker.setZIndexOffset(selected ? 800 : 0)
+      }
+      marker._flight = flight
+    })
+
+    Object.keys(markersRef.current).forEach((id) => {
+      if (live.has(id)) return
+      map.removeLayer(markersRef.current[id])
+      delete markersRef.current[id]
+      delete iconStateRef.current[id]
+    })
+
+    const selected = flights.find((f) => f.uid === selectedId)
+    if (!selected?.origin || !selected?.dest) {
+      if (routeRef.current) {
+        map.removeLayer(routeRef.current.group)
+        routeRef.current = null
+      }
+      return
     }
-    const f = flightsRef.current.find((fl) => fl.uid === selectedId)
-    if (!f?.origin || !f?.dest) return
-    const from = [f.origin.lat, f.origin.lng]
-    const now = [f.lat, f.lng]
-    const to = [f.dest.lat, f.dest.lng]
-    const group = L.layerGroup()
-    L.polyline([from, now, to], {
-      color: routeHighlight ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
-      weight: routeHighlight ? 1.6 : 1.2,
-      dashArray: '2 7',
-      className: `route-flow${routeHighlight ? ' route-line--focus' : ''}`,
-    }).addTo(group)
-    L.polyline([from, now], {
-      color: '#c4843a',
-      weight: routeHighlight ? 3.4 : 2,
-      opacity: routeHighlight ? 1 : 0.9,
-      className: routeHighlight ? 'route-line--focus' : '',
-    }).addTo(group)
-    L.marker(from, { icon: airportPinIcon('origin'), interactive: false, keyboard: false }).addTo(group)
-    L.marker(to, { icon: airportPinIcon('dest'), interactive: false, keyboard: false }).addTo(group)
-    group.addTo(map)
-    routeRef.current = group
-    if (!routeHighlight) {
-      map.flyTo(now, Math.max(map.getZoom(), 5.4), { duration: 0.85 })
+
+    const { flown, remain } = splitRoute(selected.origin, selected.dest, selected.progress)
+    const from = [selected.origin.lat, selected.origin.lng]
+    const to = [selected.dest.lat, selected.dest.lng]
+    const accent = routeHighlight ? 1 : 0.92
+    const remainOp = routeHighlight ? 0.7 : 0.5
+
+    if (!routeRef.current) {
+      const group = L.layerGroup()
+      const remainLine = L.polyline(remain, {
+        color: '#c4843a',
+        weight: 1.7,
+        opacity: remainOp,
+        dashArray: '5 8',
+        lineCap: 'round',
+        interactive: false,
+      }).addTo(group)
+      const flownLine = L.polyline(flown, {
+        color: '#c4843a',
+        weight: routeHighlight ? 3 : 2.2,
+        opacity: accent,
+        lineCap: 'round',
+        interactive: false,
+      }).addTo(group)
+      const originM = L.marker(from, {
+        icon: airportIcon(selected.from, 'origin'),
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: 200,
+      }).addTo(group)
+      const destM = L.marker(to, {
+        icon: airportIcon(selected.to, 'dest'),
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: 200,
+      }).addTo(group)
+      group.addTo(map)
+      routeRef.current = { group, remainLine, flownLine, originM, destM, from: selected.from, to: selected.to }
+    } else {
+      const layer = routeRef.current
+      layer.remainLine.setLatLngs(remain)
+      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 2 : 1.7 })
+      layer.flownLine.setLatLngs(flown)
+      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 3 : 2.2 })
+      layer.originM.setLatLng(from)
+      layer.destM.setLatLng(to)
+      if (layer.from !== selected.from) {
+        layer.originM.setIcon(airportIcon(selected.from, 'origin'))
+        layer.from = selected.from
+      }
+      if (layer.to !== selected.to) {
+        layer.destM.setIcon(airportIcon(selected.to, 'dest'))
+        layer.to = selected.to
+      }
     }
-  }, [selectedId, mapReady, routeHighlight])
+
+    if (lastFitRef.current !== selectedId && !routeHighlight) {
+      lastFitRef.current = selectedId
+      const bounds = L.latLngBounds(from, to).extend([selected.lat, selected.lng])
+      map.flyToBounds(bounds, { padding: [88, 88], maxZoom: 6.2, duration: 0.85 })
+    }
+  }, [flights, selectedId, mapReady, routeHighlight])
 
   return <div ref={mapRef} className="ops-map" />
 }

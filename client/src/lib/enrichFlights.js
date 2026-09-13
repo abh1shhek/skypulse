@@ -1,5 +1,5 @@
 import { airportOf } from './airports'
-import { bearingBetween, haversine, lerpCoord, seedFrom } from './flightMath'
+import { haversine, headingAlong, slerpCoord, seedFrom } from './flightMath'
 
 const MODELS = {
   A20N: 'Airbus A320neo',
@@ -42,15 +42,15 @@ export function enrichFlights(raw = []) {
     const dest = airportOf(f.to)
     const dist = origin && dest ? Math.round(haversine(origin, dest)) : f.dist || 0
     const progress = Math.min(0.92, Math.max(0.08, ((seed % 780) + 80) / 1000))
-    const pos =
-      f.lat && f.lng
+    const pos = origin && dest
+      ? slerpCoord(origin, dest, progress)
+      : f.lat && f.lng
         ? { lat: f.lat, lng: f.lng }
-        : origin && dest
-          ? lerpCoord(origin, dest, progress)
-          : origin || dest || { lat: 22, lng: 78 }
+        : origin || dest || { lat: 22, lng: 78 }
 
-    const bearing =
-      f.bearing || (origin && dest ? bearingBetween(origin, dest) : 45)
+    const bearing = origin && dest
+      ? headingAlong(origin, dest, progress)
+      : (f.bearing || 45)
     const speed = f.speed > 40 ? f.speed : hashUnit(seed, 740, 910)
     const alt = f.alt > 100 ? f.alt : hashUnit(seed >> 3, 9800, 12500)
     const flown = dist ? Math.round(dist * progress) : 0
@@ -101,7 +101,8 @@ export function tickFlight(f, dt = 1) {
   const nextProgress = Math.min(0.97, f.progress + (0.00022 * dt))
   const origin = f.origin
   const dest = f.dest
-  const pos = origin && dest ? lerpCoord(origin, dest, nextProgress) : { lat: f.lat, lng: f.lng }
+  const pos = origin && dest ? slerpCoord(origin, dest, nextProgress) : { lat: f.lat, lng: f.lng }
+  const bearing = origin && dest ? headingAlong(origin, dest, nextProgress) : f.bearing
   const speed = Math.max(420, f.speed + Math.sin((Date.now() / 900) + (f._seed % 50)) * 1.4)
   const alt = Math.max(300, f.alt + Math.cos((Date.now() / 1400) + (f._seed % 40)) * 8)
   const flown = f.dist ? Math.round(f.dist * nextProgress) : f.flown
@@ -111,6 +112,8 @@ export function tickFlight(f, dt = 1) {
     progress: nextProgress,
     lat: pos.lat,
     lng: pos.lng,
+    bearing,
+    heading: Math.round(bearing || 0),
     speed,
     alt,
     flown,

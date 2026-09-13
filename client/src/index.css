@@ -697,30 +697,53 @@ button, input { font-family: inherit; }
   font-size: 9px !important;
 }
 .ac {
-  color: rgba(255,255,255,0.55);
+  position: relative;
+  z-index: 1;
+  color: rgba(242, 238, 230, 0.78);
   transform-origin: center;
-  transition: color 0.2s ease, filter 0.2s ease;
 }
-.ac.is-near { color: rgba(255,255,255,0.78); }
-.ac.is-selected { color: #fff; filter: drop-shadow(0 0 7px rgba(255,255,255,0.85)); }
 .ac-wrap {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
 }
-.ac-ring {
+.ac-wrap.is-selected .ac {
+  color: #fff;
+}
+.ac-disc {
   position: absolute;
-  inset: 2px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.4);
+  background: radial-gradient(circle, rgba(10, 10, 12, 0.72) 38%, transparent 72%);
 }
-.leaflet-div-icon, .ac-icon {
+.ac-wrap.is-selected .ac-disc {
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle, rgba(196, 132, 58, 0.32) 28%, transparent 70%);
+}
+.ac-pulse {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 132, 58, 0.42);
+  animation: ac-radar 2.8s ease-out infinite;
+  pointer-events: none;
+}
+.ac-pulse--late { animation-delay: 1.4s; }
+@keyframes ac-radar {
+  0% { transform: scale(1); opacity: 0.45; }
+  100% { transform: scale(2.35); opacity: 0; }
+}
+.leaflet-div-icon, .ac-icon, .apt-icon {
   background: none !important;
   border: none !important;
-  cursor: pointer !important;
 }
+.ac-icon { cursor: pointer !important; }
 
 .menu-fab:focus-visible {
   outline: 1px solid rgba(196, 132, 58, 0.65);
@@ -817,7 +840,6 @@ button, input { font-family: inherit; }
   to { opacity: 1; transform: none; }
 }
 
-.route-line--focus { filter: drop-shadow(0 0 6px rgba(196,132,58,0.75)); }
 .ops-stage--view { overflow: auto; scroll-behavior: smooth; background: radial-gradient(circle at 72% 12%, rgba(196,132,58,.08), transparent 32%), var(--bg); }
 .ops-view { max-width: 1120px; width: 100%; margin: 0 auto; padding: 56px clamp(24px, 6vw, 84px); color: var(--text); animation: reveal .35s var(--ease-out) both; }
 .ops-view__head { display: flex; justify-content: space-between; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
@@ -909,48 +931,33 @@ button, input { font-family: inherit; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
 
-/* ─── Aircraft & airport markers (visibility fix) ─── */
-.ac {
-  position: relative;
-  color: #f4f1ea;
-  transform-origin: center;
-  transition: color 0.2s ease, filter 0.2s ease;
+/* ─── Aircraft & airport markers ─── */
+.apt-icon { pointer-events: none !important; }
+.apt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
-.ac.is-near { color: #fff; filter: drop-shadow(0 0 4px rgba(255,255,255,0.45)); }
-.ac.is-selected { color: var(--accent-2); filter: drop-shadow(0 0 8px rgba(217,160,90,0.9)); }
-.ac-wrap {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-}
-.ac-wrap::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
+.apt__dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(10, 10, 12, 0.8);
-  border: 1px solid rgba(255,255,255,0.22);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196, 132, 58, 0.22), 0 1px 3px rgba(0, 0, 0, 0.55);
+  flex-shrink: 0;
 }
-.ac-ring {
-  animation: ring 1.8s ease-out infinite;
+.apt--dest .apt__dot {
+  background: #d9a05a;
+  box-shadow: 0 0 0 3px rgba(217, 160, 90, 0.28), 0 1px 3px rgba(0, 0, 0, 0.55);
 }
-.airport-pin-icon { background: none !important; border: none !important; }
-.airport-pin { width: 18px; height: 18px; display: grid; place-items: center; }
-.airport-pin__dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: #0d0d10;
-  border: 2px solid var(--accent-2);
-  box-shadow: 0 0 0 3px rgba(217,160,90,0.22), 0 2px 4px rgba(0,0,0,0.5);
+.apt__code {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #ece8e0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.92), 0 0 12px rgba(0, 0, 0, 0.55);
 }
-.airport-pin--dest .airport-pin__dot {
-  border-color: #7fd88f;
-  box-shadow: 0 0 0 3px rgba(127,216,143,0.22), 0 2px 4px rgba(0,0,0,0.5);
-}
-.route-flow { animation: dash-flow 1.4s linear infinite; }
-@keyframes dash-flow { to { stroke-dashoffset: -18; } }
 @media (prefers-reduced-motion: reduce) {
-  .ac-ring, .route-flow { animation: none; }
+  .ac-pulse { animation: none; opacity: 0.35; }
 }

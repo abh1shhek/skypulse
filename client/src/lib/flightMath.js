@@ -20,6 +20,44 @@ export function lerpCoord(a, b, t) {
   }
 }
 
+function toCartesian(p) {
+  const φ = rad(p.lat)
+  const λ = rad(p.lng)
+  return [Math.cos(φ) * Math.cos(λ), Math.cos(φ) * Math.sin(λ), Math.sin(φ)]
+}
+
+function fromCartesian(x, y, z) {
+  return { lat: deg(Math.asin(Math.min(1, Math.max(-1, z)))), lng: deg(Math.atan2(y, x)) }
+}
+
+export function slerpCoord(a, b, t) {
+  if (!a || !b) return a || b || { lat: 0, lng: 0 }
+  if (t <= 0) return { lat: a.lat, lng: a.lng }
+  if (t >= 1) return { lat: b.lat, lng: b.lng }
+  const A = toCartesian(a)
+  const B = toCartesian(b)
+  const d = Math.min(1, Math.max(-1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2]))
+  const omega = Math.acos(d)
+  if (omega < 1e-6) return lerpCoord(a, b, t)
+  const sinO = Math.sin(omega)
+  const s1 = Math.sin((1 - t) * omega) / sinO
+  const s2 = Math.sin(t * omega) / sinO
+  return fromCartesian(A[0] * s1 + B[0] * s2, A[1] * s1 + B[1] * s2, A[2] * s1 + B[2] * s2)
+}
+
+export function geodesicPoints(a, b, steps = 48) {
+  const n = Math.max(2, steps)
+  const pts = []
+  for (let i = 0; i <= n; i++) pts.push(slerpCoord(a, b, i / n))
+  return pts
+}
+
+export function headingAlong(a, b, t) {
+  const p0 = slerpCoord(a, b, Math.max(0, t - 0.004))
+  const p1 = slerpCoord(a, b, Math.min(1, t + 0.004))
+  return bearingBetween(p0, p1)
+}
+
 export function bearingBetween(a, b) {
   const y = Math.sin(rad(b.lng - a.lng)) * Math.cos(rad(b.lat))
   const x =

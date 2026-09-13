@@ -18,6 +18,8 @@ export const AIRPORTS = {
   IXB: { lat: 26.6812, lng: 88.3286, city: 'Bagdogra', tz: 'IST' },
   SXR: { lat: 33.9871, lng: 74.7741, city: 'Srinagar', tz: 'IST' },
   NAG: { lat: 21.0922, lng: 79.0472, city: 'Nagpur', tz: 'IST' },
+  VTZ: { lat: 17.7212, lng: 83.2245, city: 'Visakhapatnam', tz: 'IST' },
+  GYD: { lat: 40.4675, lng: 50.0467, city: 'Baku', tz: 'AZT' },
   LHR: { lat: 51.4700, lng: -0.4543, city: 'London', tz: 'GMT' },
   DXB: { lat: 25.2532, lng: 55.3657, city: 'Dubai', tz: 'GST' },
   SIN: { lat: 1.3644, lng: 103.9915, city: 'Singapore', tz: 'SGT' },
