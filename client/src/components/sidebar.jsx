@@ -46,12 +46,24 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={`rail ${sidebarOpen ? 'is-open' : ''}`} aria-label="SkyPulse">
+    <aside
+      id="skypulse-rail"
+      className={`rail ${sidebarOpen ? 'is-open' : ''}`}
+      aria-label="SkyPulse navigation"
+    >
       <div className="rail__brand">
         <div className="rail__mark" aria-hidden="true">
           <Icon d={I.plane} size={13} />
         </div>
         <div className="rail__name">SkyPulse</div>
+        <button
+          type="button"
+          className="rail__close"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close navigation"
+        >
+          <Icon d={I.close} size={14} />
+        </button>
       </div>
 
       <label className="rail__search">
@@ -79,8 +91,8 @@ export default function Sidebar() {
 
       <nav className="rail__nav" aria-label="Main">
         {GROUPS.map((group) => (
-          <div key={group.id} className="nav-group">
-            <p className="nav-group__label">{group.label}</p>
+          <div key={group.id} className="nav-group" role="group" aria-label={group.label}>
+            <p className="nav-group__label" aria-hidden="true">{group.label}</p>
             {group.items.map((item) => (
               <button
                 key={item.id}

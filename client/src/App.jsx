@@ -16,7 +16,20 @@ export default function App() {
 
   useEffect(() => { fetchFlights({ dep_iata: 'DEL' }); fetchNews('aviation') }, [])
   useEffect(() => { const id = setInterval(tick, 1200); return () => clearInterval(id) }, [tick])
-  useEffect(() => { const onKey = (e) => { if (e.key === '/' && e.target.tagName !== 'INPUT') { e.preventDefault(); document.querySelector('.rail__search input')?.focus() }; if (e.key === 'Escape') setSelected(null) }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey) }, [setSelected])
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault()
+        document.querySelector('.rail__search input')?.focus()
+      }
+      if (e.key === 'Escape') {
+        if (sidebarOpen) setSidebarOpen(false)
+        else setSelected(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setSelected, sidebarOpen, setSidebarOpen])
 
   const share = async () => {
     const url = window.location.href
@@ -24,12 +37,17 @@ export default function App() {
   }
 
   const live = nav === 'tracking'
-  return <div className="ops-shell"><Sidebar />{sidebarOpen && <div className="rail-backdrop" onClick={() => setSidebarOpen(false)} />}
+  return (
+    <div className="ops-shell">
+      <Sidebar />
+      {sidebarOpen && (
+        <button type="button" className="rail-backdrop" onClick={() => setSidebarOpen(false)} aria-label="Close navigation" />
+      )}
     <div className={`ops-stage ${!live ? 'ops-stage--view' : ''}`}>
-      {live ? <><MapCanvas flights={visible} selectedId={selectedId} onSelect={setSelected} onReady={(api) => { mapApi.current = api }} /><div className="map-vignette" /><button className="icon-btn menu-fab hud__chip" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Icon d={I.menu} size={16} /></button>
+      {live ? <><MapCanvas flights={visible} selectedId={selectedId} onSelect={setSelected} onReady={(api) => { mapApi.current = api }} /><div className="map-vignette" /><button className="icon-btn menu-fab hud__chip" onClick={() => setSidebarOpen(true)} aria-label="Open navigation" aria-expanded={sidebarOpen} aria-controls="skypulse-rail"><Icon d={I.menu} size={16} /></button>
         {selected && <DetailPanel flight={selected} followed={Boolean(followed[selected.uid])} onClose={() => setSelected(null)} onFollow={() => toggleFollow(selected.uid)} onRoute={() => mapApi.current?.focusRoute?.()} onShare={share} shareState={shareState} />}
         <div className="hud"><button type="button" className="hud__chip" onClick={() => error && fetchFlights({ dep_iata: 'DEL' })}><i className="live-dot" />{error ? 'Signal lost — retry' : 'Live operations'}</button><div className="zoom"><button type="button" onClick={() => mapApi.current?.zoomIn()} aria-label="Zoom in">+</button><button type="button" onClick={() => mapApi.current?.zoomOut()} aria-label="Zoom out">−</button></div></div>
         <div className="flight-strip">{loading && Array.from({ length: 3 }).map((_, i) => <div key={`skeleton-${i}`} className="fcard is-skeleton" aria-hidden="true" />)}{!loading && visible.length === 0 && <p className="mono" style={{ color: '#777', fontSize: 12, padding: 12 }}>No matching flights.</p>}{!loading && visible.map((f) => <FlightCard key={f.uid} flight={f} followed={Boolean(followed[f.uid])} selected={f.uid === selectedId} onClick={() => setSelected(f.uid)} />)}</div>
-      </> : <><button className="icon-btn menu-fab hud__chip" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Icon d={I.menu} size={16} /></button><OperationsView nav={nav} flights={flights} selectedId={selectedId} followed={followed} query={query} news={news} onSelect={(id) => { setSelected(id); setNav('tracking') }} onOpenTracking={() => setNav('tracking')} onClearFollowed={clearFollowed} /></>}
+      </> : <><button className="icon-btn menu-fab hud__chip" onClick={() => setSidebarOpen(true)} aria-label="Open navigation" aria-expanded={sidebarOpen} aria-controls="skypulse-rail"><Icon d={I.menu} size={16} /></button><OperationsView nav={nav} flights={flights} selectedId={selectedId} followed={followed} query={query} news={news} onSelect={(id) => { setSelected(id); setNav('tracking') }} onOpenTracking={() => setNav('tracking')} onClearFollowed={clearFollowed} /></>}
     </div></div>
 }

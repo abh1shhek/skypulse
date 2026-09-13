@@ -98,8 +98,23 @@ button, input { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 18px 14px;
+  padding: 18px 14px 14px 18px;
 }
+
+.rail__close {
+  display: none;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  place-items: center;
+}
+.rail__close:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.rail__close:focus-visible { outline: 1px solid rgba(196, 132, 58, 0.65); outline-offset: 1px; }
 
 .rail__mark {
   width: 26px;
@@ -705,12 +720,20 @@ button, input { font-family: inherit; }
   cursor: pointer !important;
 }
 
+.menu-fab:focus-visible {
+  outline: 1px solid rgba(196, 132, 58, 0.65);
+  outline-offset: 2px;
+}
+
 .rail-backdrop {
   display: none;
   position: fixed;
   inset: 0;
+  border: none;
+  padding: 0;
   background: rgba(0,0,0,0.45);
   z-index: 25;
+  cursor: pointer;
 }
 
 @keyframes panel-in {
@@ -734,21 +757,33 @@ button, input { font-family: inherit; }
   100% { transform: scale(1.25); opacity: 0; }
 }
 
+@media (max-width: 1280px) {
+  .rail { width: 236px; }
+}
+
 @media (max-width: 1024px) {
   .rail {
     position: absolute;
-    width: min(84vw, 300px);
+    width: min(86vw, 300px);
     transform: translateX(-105%);
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: 16px 0 40px rgba(0,0,0,0.35);
   }
-  .rail.is-open { transform: none; }
+  .rail.is-open {
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .rail__close { display: grid; }
   .rail-backdrop {
     display: block;
     position: fixed;
     background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
   }
   .menu-fab { display: grid; place-items: center; }
+  .ops-stage--view { padding-top: 56px; }
+  .nav-item, .btn-primary { min-height: 40px; }
     .detail {
     left: 10px;
     right: 10px;
@@ -863,7 +898,13 @@ button, input { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .fcard.is-skeleton { animation: none; background: var(--surface); }
 }
-@media (max-width: 600px) { .ops-view { padding: 48px 18px; } .ops-metrics { grid-template-columns: 1fr; } .ops-view h1 { font-size: 36px; } }
+@media (max-width: 480px) {
+  .rail { width: min(92vw, 300px); }
+  .nav-item { min-height: 44px; }
+  .ops-view { padding: 36px 16px; }
+  .hud { right: 10px; top: 12px; }
+  .menu-fab { top: 12px; left: 12px; }
+}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
 
 /* ─── Aircraft & airport markers (visibility fix) ─── */
