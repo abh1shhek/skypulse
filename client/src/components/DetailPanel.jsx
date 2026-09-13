@@ -5,6 +5,10 @@ import AnimatedNumber from './AnimatedNumber'
 import { I, Icon, PlaneGlyph } from './icons'
 import RouteArc from './RouteArc'
 
+function toFeet(meters) {
+  return Math.round((Number(meters) || 0) * 3.28084)
+}
+
 export default function DetailPanel({ flight, onClose, followed, onFollow, onRoute, onShare, shareState }) {
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -14,31 +18,20 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
   }, [flight.uid])
 
   const st = statusMeta(flight.status)
-  const cells = [
-    { k: 'Aircraft', v: flight.aircraftModel },
-    { k: 'Registration', v: flight.registration, num: true },
-    { k: 'Airline', v: flight.airline },
-    { k: 'Country', v: flight.country },
-    { k: 'Speed', v: flight.speed, live: 'speed' },
-    { k: 'Altitude', v: flight.alt, live: 'alt' },
-    { k: 'Heading', v: `${Math.round(flight.heading)}°`, num: true },
-    { k: 'Category', v: flight.category },
-    { k: 'Gate', v: flight.gate, num: true },
-    { k: 'Terminal', v: flight.terminal, num: true },
-    { k: 'Airframe', v: flight.age, num: true },
-    { k: 'Status', v: st.label },
-  ]
+  const heading = Math.round(flight.heading || flight.bearing || 0)
 
   return (
-    <section className="detail" style={{ opacity: ready ? 1 : 0.96 }}>
+    <section className={`detail ${ready ? 'is-ready' : ''}`} aria-label="Selected flight">
       <header className="detail__head">
         <div className="detail__ids">
           <strong>{flight.id}</strong>
-          <span>{flight.callsign}</span>
-          <span>{flight.aircraft}</span>
-          <span className={`pill ${st.tone}`}>{st.label}</span>
+          <p>
+            {flight.aircraft}
+            {flight.registration ? ` · ${flight.registration}` : ''}
+          </p>
         </div>
-        <button className="icon-btn" onClick={onClose} aria-label="Close">
+        <span className={`pill ${st.tone}`}>{st.label}</span>
+        <button type="button" className="icon-btn" onClick={onClose} aria-label="Close flight details">
           <Icon d={I.close} size={14} />
         </button>
       </header>
@@ -52,33 +45,13 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
           <div>
             <div className="iata">{flight.from}</div>
             <div className="city">{flight.fromCity}</div>
-            <div className="tz">{flight.fromTz}</div>
           </div>
-          <div className="plane-mid">
-            <PlaneGlyph size={13} />
+          <div className="plane-mid" aria-hidden="true">
+            <PlaneGlyph size={12} />
           </div>
           <div className="align-right">
             <div className="iata">{flight.to}</div>
             <div className="city">{flight.toCity}</div>
-            <div className="tz">{flight.toTz}</div>
-          </div>
-        </div>
-
-        <div className="timeline">
-          <div className="timeline__row">
-            <div className="timeline__label"><i className="dot" />Scheduled</div>
-            <span className="num">{formatClock(flight.scheduled?.[0])}</span>
-            <span className="num">{formatClock(flight.scheduled?.[1])}</span>
-          </div>
-          <div className="timeline__row">
-            <div className="timeline__label"><i className="dot on" />Actual</div>
-            <span className="num">{formatClock(flight.actual?.[0])}</span>
-            <span className="num">{formatClock(flight.actual?.[1])}</span>
-          </div>
-          <div className="timeline__row">
-            <div className="timeline__label"><i className="dot" />Estimated</div>
-            <span className="num">{formatClock(flight.actual?.[0] || flight.scheduled?.[0])}</span>
-            <span className="num">{formatClock(flight.actual?.[1] || flight.scheduled?.[1])}</span>
           </div>
         </div>
 
@@ -90,25 +63,49 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
           remainMin={flight.remainMin}
         />
 
-        <div className="section-h"><i />Flight information</div>
-        <div className="info-grid">
-          {cells.map((cell) => (
-            <div key={cell.k} className="info-cell">
-              <span>{cell.k}</span>
-              {cell.live === 'speed' ? (
-                <AnimatedNumber value={flight.speed} format={(n) => `${Math.round(n)} km/h`} />
-              ) : cell.live === 'alt' ? (
-                <AnimatedNumber value={flight.alt} format={(n) => `${Math.round(n).toLocaleString()} m`} />
-              ) : (
-                <strong className={cell.num ? 'num' : ''}>{cell.v}</strong>
-              )}
-            </div>
-          ))}
+        <div className="timeline">
+          <div className="timeline__row">
+            <div className="timeline__label">Scheduled</div>
+            <span className="num">{formatClock(flight.scheduled?.[0])}</span>
+            <span className="num">{formatClock(flight.scheduled?.[1])}</span>
+          </div>
+          <div className="timeline__row">
+            <div className="timeline__label">Actual</div>
+            <span className="num">{formatClock(flight.actual?.[0])}</span>
+            <span className="num">{formatClock(flight.actual?.[1])}</span>
+          </div>
+          <div className="timeline__row">
+            <div className="timeline__label">Estimated</div>
+            <span className="num">{formatClock(flight.actual?.[0] || flight.scheduled?.[0])}</span>
+            <span className="num">{formatClock(flight.actual?.[1] || flight.scheduled?.[1])}</span>
+          </div>
+        </div>
+
+        <div className="telemetry" aria-label="Live telemetry">
+          <div>
+            <span>Altitude</span>
+            <AnimatedNumber value={toFeet(flight.alt)} format={(n) => `${Math.round(n).toLocaleString()} ft`} />
+          </div>
+          <div>
+            <span>Speed</span>
+            <AnimatedNumber value={flight.speed} format={(n) => `${Math.round(n).toLocaleString()} km/h`} />
+          </div>
+          <div>
+            <span>Heading</span>
+            <strong className="num">{heading}°</strong>
+          </div>
+          <div>
+            <span>Remain</span>
+            <AnimatedNumber value={flight.remaining} format={(n) => `${Math.round(n).toLocaleString()} km`} />
+          </div>
         </div>
       </div>
+
       <div className="detail__actions">
         <button type="button" onClick={onRoute}>Route</button>
-        <button type="button" className={followed ? 'is-active' : ''} onClick={onFollow}>{followed ? 'Following' : 'Follow'}</button>
+        <button type="button" className={followed ? 'is-active' : ''} onClick={onFollow}>
+          {followed ? 'Following' : 'Follow'}
+        </button>
         <button type="button" onClick={onShare}>{shareState || 'Share'}</button>
       </div>
     </section>
