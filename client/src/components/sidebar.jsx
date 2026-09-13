@@ -80,6 +80,7 @@ export default function Sidebar() {
       </label>
 
       <button
+        type="button"
         className="btn-primary"
         onClick={() => {
           const first = flights[0]
