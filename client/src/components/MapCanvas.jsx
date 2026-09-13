@@ -33,8 +33,6 @@ function airportPinIcon(type) {
     iconAnchor: [9, 9],
   })
 }
-
-function nearestFlight(map, latlng, flights) {
 function nearestFlight(map, latlng, flights) {
   let best = null
   let bestD = Infinity
@@ -142,7 +140,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady }) {
       color: routeHighlight ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
       weight: routeHighlight ? 1.6 : 1.2,
       dashArray: '2 7',
-      className: routeHighlight ? 'route-line--focus' : '',
+      className: `route-flow${routeHighlight ? ' route-line--focus' : ''}`,
     }).addTo(group)
     L.polyline([from, now], {
       color: '#c4843a',
