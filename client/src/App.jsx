@@ -26,6 +26,7 @@ export default function App() {
     toggleFollow,
     setNav,
     clearFollowed,
+    syncNavFromLocation,
   } = useFlightStore()
 
   const mapApi = useRef(null)
@@ -46,6 +47,17 @@ export default function App() {
     fetchFlights({ dep_iata: 'DEL' })
     fetchNews('aviation')
   }, [])
+
+  useEffect(() => {
+    syncNavFromLocation()
+    const onPop = () => syncNavFromLocation()
+    window.addEventListener('popstate', onPop)
+    window.addEventListener('hashchange', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      window.removeEventListener('hashchange', onPop)
+    }
+  }, [syncNavFromLocation])
 
   useEffect(() => {
     const id = setInterval(tick, 1200)

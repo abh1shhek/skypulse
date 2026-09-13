@@ -40,6 +40,8 @@ function isActive(nav, id) {
 export default function Sidebar() {
   const { query, setQuery, nav, setNav, sidebarOpen, setSidebarOpen, setSelected, flights, news } = useFlightStore()
 
+  const brief = news.filter((n) => n.url && n.url !== '#').slice(0, 3)
+
   const go = (id) => {
     setNav(id)
     setSidebarOpen(false)
@@ -112,14 +114,14 @@ export default function Sidebar() {
           </div>
         ))}
 
-        {news.length > 0 && (
+        {brief.length > 0 && (
           <div className="brief">
             <div className="brief__h">Ops brief</div>
-            {news.slice(0, 3).map((n) => (
+            {brief.map((n) => (
               <a
-                key={n.url || n.title}
+                key={n.url}
                 className="brief__item"
-                href={n.url || '#'}
+                href={n.url}
                 target="_blank"
                 rel="noreferrer"
               >

@@ -172,13 +172,13 @@ export default function OperationsView({
             empty="No flights in this window."
           />
         </section>
-        {news.length > 0 && (
+        {news.filter((n) => n.url && n.url !== '#').length > 0 && (
           <section className="ops-view__section">
             <div className="section-h"><i />Ops brief</div>
             <ul className="ops-brief-list">
-              {news.slice(0, 4).map((n) => (
-                <li key={n.url || n.title}>
-                  <a href={n.url || '#'} target="_blank" rel="noreferrer">{n.title}</a>
+              {news.filter((n) => n.url && n.url !== '#').slice(0, 4).map((n) => (
+                <li key={n.url}>
+                  <a href={n.url} target="_blank" rel="noreferrer">{n.title}</a>
                   <span>{n.source}</span>
                 </li>
               ))}

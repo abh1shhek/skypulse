@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { getFlights, getNews } from '../services/api'
 import { enrichFlights, tickFlight } from '../lib/enrichFlights'
+import { NAV_IDS } from '../lib/nav'
 
 function readFollowed() {
   try {
@@ -11,6 +12,20 @@ function readFollowed() {
   }
 }
 
+function navFromHash() {
+  if (typeof window === 'undefined') return 'tracking'
+  const id = window.location.hash.replace(/^#/, '')
+  return NAV_IDS.includes(id) ? id : 'tracking'
+}
+
+function writeHash(nav, replace = false) {
+  if (typeof window === 'undefined') return
+  const next = `#${nav}`
+  if (window.location.hash === next) return
+  if (replace) window.history.replaceState({ nav }, '', next)
+  else window.history.pushState({ nav }, '', next)
+}
+
 const useFlightStore = create((set, get) => ({
   flights: [],
   news: [],
@@ -18,7 +33,7 @@ const useFlightStore = create((set, get) => ({
   loading: false,
   error: null,
   query: '',
-  nav: 'tracking',
+  nav: navFromHash(),
   sidebarOpen: false,
   followed: typeof window === 'undefined' ? {} : readFollowed(),
   toggleFollow: (id) => set((state) => {
@@ -64,7 +79,20 @@ const useFlightStore = create((set, get) => ({
 
   setSelected: (id) => set({ selectedId: id }),
   setQuery: (query) => set({ query }),
-  setNav: (nav) => set({ nav }),
+  setNav: (nav) => {
+    if (!NAV_IDS.includes(nav)) return
+    set({ nav })
+    writeHash(nav)
+  },
+  syncNavFromLocation: () => {
+    const id = typeof window === 'undefined' ? 'tracking' : window.location.hash.replace(/^#/, '')
+    if (NAV_IDS.includes(id)) {
+      set({ nav: id })
+      return
+    }
+    set({ nav: 'tracking' })
+    writeHash('tracking', true)
+  },
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
 }))
 
