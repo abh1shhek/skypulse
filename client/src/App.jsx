@@ -176,23 +176,27 @@ export default function App() {
                 </button>
               </div>
             </div>
-            <div className="flight-strip">
-              {loading && Array.from({ length: 3 }).map((_, i) => (
-                <div key={`skeleton-${i}`} className="fcard is-skeleton" aria-hidden="true" />
-              ))}
-              {!loading && visible.length === 0 && (
-                <p className="mono" style={{ color: '#777', fontSize: 12, padding: 12 }}>No matching flights.</p>
-              )}
-              {!loading && visible.map((f) => (
-                <FlightCard
-                  key={f.uid}
-                  flight={f}
-                  followed={Boolean(followed[f.uid])}
-                  selected={f.uid === selectedId}
-                  onClick={() => selectFlight(f.uid)}
-                />
-              ))}
-            </div>
+            <section className="live-strip" aria-label="Live flights">
+              <p className="live-strip__label">Live flights</p>
+              <div className="flight-strip">
+                {loading && Array.from({ length: 3 }).map((_, i) => (
+                  <div key={`skeleton-${i}`} className="fcard is-skeleton" aria-hidden="true" />
+                ))}
+                {!loading && visible.length === 0 && (
+                  <p className="live-strip__empty">No matching flights.</p>
+                )}
+                {!loading && visible.map((f) => (
+                  <FlightCard
+                    key={f.uid}
+                    flight={f}
+                    followed={Boolean(followed[f.uid])}
+                    selected={f.uid === selectedId}
+                    pinSelected
+                    onClick={() => selectFlight(f.uid)}
+                  />
+                ))}
+              </div>
+            </section>
           </>
         ) : (
           <>
@@ -213,7 +217,7 @@ export default function App() {
               followed={followed}
               query={query}
               news={news}
-              onSelect={(id) => { setSelected(id); setNav('tracking') }}
+              onSelect={(id) => { selectFlight(id); setNav('tracking') }}
               onOpenTracking={() => setNav('tracking')}
               onClearFollowed={clearFollowed}
             />
