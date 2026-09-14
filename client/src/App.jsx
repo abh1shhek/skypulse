@@ -133,7 +133,7 @@ export default function App() {
             <div className="map-vignette" />
             <button
               type="button"
-              className="icon-btn menu-fab hud__chip"
+              className="menu-fab"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation"
               aria-expanded={sidebarOpen}
@@ -202,7 +202,7 @@ export default function App() {
           <>
             <button
               type="button"
-              className="icon-btn menu-fab hud__chip"
+              className="menu-fab"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation"
               aria-expanded={sidebarOpen}
