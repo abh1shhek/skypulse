@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import aircraftHero from '../assets/aircraft-hero.png'
 import { formatClock, statusMeta } from '../lib/flightMath'
 import AnimatedNumber from './AnimatedNumber'
-import { I, Icon, PlaneGlyph } from './icons'
+import { I, Icon } from './icons'
 import RouteArc from './RouteArc'
 
 function toFeet(meters) {
@@ -29,15 +29,15 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
             {flight.aircraft}
             {flight.registration ? ` · ${flight.registration}` : ''}
           </p>
+          <span className={`detail__status tone-${st.tone}`}>{st.label}</span>
         </div>
-        <span className={`pill ${st.tone}`}>{st.label}</span>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Close flight details">
           <Icon d={I.close} size={14} />
         </button>
       </header>
 
       <div className="detail__scroll">
-        <div className="detail__visual">
+        <div className="detail__visual sp-slab">
           <img src={aircraftHero} alt="" />
         </div>
 
@@ -46,9 +46,7 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
             <div className="iata">{flight.from}</div>
             <div className="city">{flight.fromCity}</div>
           </div>
-          <div className="plane-mid" aria-hidden="true">
-            <PlaneGlyph size={12} />
-          </div>
+          <span className="route-codes__to" aria-hidden="true">→</span>
           <div className="align-right">
             <div className="iata">{flight.to}</div>
             <div className="city">{flight.toCity}</div>
@@ -62,24 +60,6 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
           elapsedMin={flight.elapsedMin}
           remainMin={flight.remainMin}
         />
-
-        <div className="timeline">
-          <div className="timeline__row">
-            <div className="timeline__label">Scheduled</div>
-            <span className="num">{formatClock(flight.scheduled?.[0])}</span>
-            <span className="num">{formatClock(flight.scheduled?.[1])}</span>
-          </div>
-          <div className="timeline__row">
-            <div className="timeline__label">Actual</div>
-            <span className="num">{formatClock(flight.actual?.[0])}</span>
-            <span className="num">{formatClock(flight.actual?.[1])}</span>
-          </div>
-          <div className="timeline__row">
-            <div className="timeline__label">Estimated</div>
-            <span className="num">{formatClock(flight.actual?.[0] || flight.scheduled?.[0])}</span>
-            <span className="num">{formatClock(flight.actual?.[1] || flight.scheduled?.[1])}</span>
-          </div>
-        </div>
 
         <div className="telemetry" aria-label="Live telemetry">
           <div>
@@ -99,12 +79,30 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
             <AnimatedNumber value={flight.remaining} format={(n) => `${Math.round(n).toLocaleString()} km`} />
           </div>
         </div>
+
+        <div className="timeline">
+          <div className="timeline__row">
+            <div className="timeline__label">Scheduled</div>
+            <span className="num">{formatClock(flight.scheduled?.[0])}</span>
+            <span className="num">{formatClock(flight.scheduled?.[1])}</span>
+          </div>
+          <div className="timeline__row">
+            <div className="timeline__label">Actual</div>
+            <span className="num">{formatClock(flight.actual?.[0])}</span>
+            <span className="num">{formatClock(flight.actual?.[1])}</span>
+          </div>
+          <div className="timeline__row">
+            <div className="timeline__label">Estimated</div>
+            <span className="num">{formatClock(flight.actual?.[0] || flight.scheduled?.[0])}</span>
+            <span className="num">{formatClock(flight.actual?.[1] || flight.scheduled?.[1])}</span>
+          </div>
+        </div>
       </div>
 
       <div className="detail__actions">
         <button type="button" onClick={onRoute}>Route</button>
         <button type="button" className={followed ? 'is-active' : ''} onClick={onFollow}>
-          {followed ? 'Following' : 'Follow'}
+          {followed ? 'Watching' : 'Watch'}
         </button>
         <button type="button" onClick={onShare}>{shareState || 'Share'}</button>
       </div>

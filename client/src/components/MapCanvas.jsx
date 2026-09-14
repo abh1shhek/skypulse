@@ -16,20 +16,17 @@ function safeCode(code) {
 }
 
 function aircraftIcon(flight, selected) {
-  const size = selected ? 22 : 14
+  const size = selected ? 18 : 13
   const rot = Math.round(flight.bearing || 0)
-  const pulse = selected
-    ? '<span class="ac-pulse"></span><span class="ac-pulse ac-pulse--late"></span>'
-    : ''
+  const pulse = selected ? '<span class="ac-pulse"></span>' : ''
   return L.divIcon({
     html: `<div class="ac-wrap${selected ? ' is-selected' : ''}">
       ${pulse}
-      <span class="ac-disc"></span>
       <div class="ac" style="transform:rotate(${rot}deg)">${planeSvg(size)}</div>
     </div>`,
     className: 'ac-icon',
-    iconSize: [56, 56],
-    iconAnchor: [28, 28],
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
   })
 }
 
@@ -252,17 +249,17 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
         interactive: false,
       }).addTo(group)
       const remainLine = L.polyline(remain, {
-        color: '#8d7352',
-        weight: 1.6,
+        color: '#8a93a0',
+        weight: 1.4,
         opacity: remainOp,
-        dashArray: '4 9',
+        dashArray: '3 8',
         lineCap: 'round',
         className: 'route-remain',
         interactive: false,
       }).addTo(group)
       const flownLine = L.polyline(flown, {
         color: '#c4843a',
-        weight: routeHighlight ? 3.1 : 2.4,
+        weight: routeHighlight ? 2.8 : 2.1,
         opacity: accent,
         lineCap: 'round',
         interactive: false,
@@ -285,9 +282,9 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       const layer = routeRef.current
       layer.halo.setLatLngs(path)
       layer.remainLine.setLatLngs(remain)
-      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 1.9 : 1.6 })
+      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 1.7 : 1.4 })
       layer.flownLine.setLatLngs(flown)
-      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 3.1 : 2.4 })
+      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 2.8 : 2.1 })
       layer.originM.setLatLng(from)
       layer.destM.setLatLng(to)
       if (layer.from !== selected.from) {
