@@ -1,0 +1,159 @@
+/* SkyPulse 2.0 design tokens + primitives. Pages consume these; do not restyle locally. */
+
+:root {
+  --bg: #0b0b0d;
+  --rail: #101012;
+  --surface: #141416;
+  --surface-solid: #141416;
+  --elev: #1a1a1d;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.12);
+  --text: #e8e6e1;
+  --muted: #8c8c86;
+  --dim: #5c5c58;
+  --steel: #8a93a0;
+  --accent: #c4843a;
+  --accent-2: #d9a05a;
+  --live: #6f9f6f;
+  --warn: #c9a15b;
+  --alert: #c45c4a;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 40px;
+  --space-7: 64px;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius: 4px;
+  --radius-image: 6px;
+
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+  --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.28);
+
+  --glass: rgba(12, 12, 14, 0.78);
+  --glass-strong: rgba(11, 11, 13, 0.88);
+  --glass-line: rgba(255, 255, 255, 0.08);
+
+  --vignette: radial-gradient(115% 88% at 50% 42%, transparent 36%, rgba(0, 0, 0, 0.62) 100%);
+  --image-fade: linear-gradient(180deg, transparent 40%, rgba(11, 11, 13, 0.92) 100%);
+  --route-flown: #c4843a;
+  --route-remain: #8a93a0;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 200ms;
+  --focus: 1px solid rgba(196, 132, 58, 0.7);
+
+  --sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --text-eyebrow: 10px;
+  --text-ui: 13px;
+  --text-meta: 11px;
+  --text-metric: 15px;
+  --text-iata: 40px;
+  --tracking-eyebrow: 0.14em;
+}
+
+.sp-eyebrow {
+  font-size: var(--text-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--dim);
+  font-weight: 500;
+}
+
+.sp-display {
+  font-family: var(--sans);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.sp-ui {
+  font-family: var(--sans);
+  font-size: var(--text-ui);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.sp-meta {
+  font-size: var(--text-meta);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.sp-mono,
+.num,
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.sp-rule {
+  height: 1px;
+  border: 0;
+  background: var(--line);
+}
+
+.sp-scrim {
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+.sp-inset {
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius-xs);
+}
+
+.sp-slab {
+  overflow: hidden;
+  border-radius: var(--radius-image);
+  background: #0d0d10;
+}
+
+.sp-slab img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--text-meta);
+}
+
+.sp-tick {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.rail::after,
+.ops-stage--view::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.rail { position: relative; }
+.ops-stage--view { position: relative; }

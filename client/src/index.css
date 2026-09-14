@@ -1,29 +1,5 @@
 @import "tailwindcss";
-
-:root {
-  --bg: #0e0e10;
-  --rail: #141416;
-  --surface: #17171a;
-  --surface-solid: #17171a;
-  --elev: #1c1c1f;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.13);
-  --text: #ecece8;
-  --muted: #9a9a94;
-  --dim: #6e6e68;
-  --accent: #c4843a;
-  --accent-2: #d9a05a;
-  --live: #6f9f6f;
-  --warn: #c9a15b;
-  --alert: #c45c4a;
-  --shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-  --glass: rgba(23, 23, 26, 0.72);
-  --glass-strong: rgba(20, 20, 23, 0.82);
-  --glass-line: rgba(255, 255, 255, 0.1);
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-}
+@import "./styles/system.css";
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,12 +15,6 @@ body {
 }
 
 button, input { font-family: inherit; }
-
-.num, .mono {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
 
 ::-webkit-scrollbar { height: 0; width: 0; }
 
@@ -77,7 +47,7 @@ button, input { font-family: inherit; }
   inset: 0;
   z-index: 2;
   background:
-    radial-gradient(115% 88% at 50% 42%, transparent 36%, rgba(0,0,0,0.58) 100%),
+    var(--vignette),
     linear-gradient(90deg, rgba(8,8,10,0.42) 0%, transparent 22%);
 }
 
@@ -229,7 +199,7 @@ button, input { font-family: inherit; }
   padding: 8px 10px;
   outline: none;
   line-height: 1.2;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  transition: background var(--duration) var(--ease-out), color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out);
 }
 
 .nav-item svg { opacity: 0.65; flex-shrink: 0; }
@@ -458,7 +428,7 @@ button, input { font-family: inherit; }
   padding: 18px 16px 4px;
 }
 .iata {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 22px;
   font-weight: 500;
   letter-spacing: -0.03em;
