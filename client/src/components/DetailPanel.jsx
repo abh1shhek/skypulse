@@ -28,6 +28,7 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
           <p>
             {flight.aircraft}
             {flight.registration ? ` · ${flight.registration}` : ''}
+            {flight.airline ? ` · ${flight.airline}` : ''}
           </p>
           <span className={`detail__status tone-${st.tone}`}>{st.label}</span>
         </div>

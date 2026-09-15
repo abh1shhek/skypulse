@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { formatClock, statusMeta } from '../lib/flightMath'
 import FlightMedia from './FlightMedia'
+import { PlaneGlyph } from './icons'
 
-export default function FlightCard({ flight, selected, onClick, followed = false, pinSelected = false }) {
+export default function FlightCard({ flight, selected, onClick, followed = false, pinSelected = false, compact = false }) {
   const ref = useRef(null)
   const st = statusMeta(flight.status)
   const dep = formatClock(flight.scheduled?.[0])
@@ -23,14 +24,19 @@ export default function FlightCard({ flight, selected, onClick, followed = false
     <button
       ref={ref}
       type="button"
-      className={`fcard ${selected ? 'is-selected' : ''}`}
+      className={`fcard ${compact ? 'fcard--strip' : ''} ${selected ? 'is-selected' : ''}`}
       onClick={onClick}
       aria-current={selected ? 'true' : undefined}
       aria-label={`${flight.id}, ${flight.from} to ${flight.to}, ${st.label}`}
     >
-      <FlightMedia flight={flight} className="fcard__media" />
+      {!compact && <FlightMedia flight={flight} className="fcard__media" />}
       <div className="fcard__body">
         <div className="fcard__top">
+          {compact && (
+            <span className="fcard__mark" aria-hidden="true">
+              <PlaneGlyph size={12} />
+            </span>
+          )}
           <strong>{flight.id}</strong>
           <span className={`fcard__status tone-${st.tone}`}>{st.label}</span>
         </div>
@@ -40,7 +46,10 @@ export default function FlightCard({ flight, selected, onClick, followed = false
           <span className="iata">{flight.to}</span>
         </p>
         <p className="fcard__foot">
-          {flight.aircraft} · {dep} → {arr}
+          {flight.aircraft}
+          {flight.airline ? ` · ${flight.airline}` : ''}
+          {' · '}
+          {dep} → {arr}
           {followed ? <em>Watching</em> : null}
         </p>
         <span className="fcard__progress" style={{ width: `${pct}%` }} aria-hidden="true" />

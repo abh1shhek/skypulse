@@ -180,7 +180,7 @@ export default function App() {
               <p className="live-strip__label">Live flights</p>
               <div className="flight-strip">
                 {loading && Array.from({ length: 3 }).map((_, i) => (
-                  <div key={`skeleton-${i}`} className="fcard is-skeleton" aria-hidden="true" />
+                  <div key={`skeleton-${i}`} className="fcard fcard--strip is-skeleton" aria-hidden="true" />
                 ))}
                 {!loading && visible.length === 0 && (
                   <p className="live-strip__empty">No matching flights.</p>
@@ -192,6 +192,7 @@ export default function App() {
                     followed={Boolean(followed[f.uid])}
                     selected={f.uid === selectedId}
                     pinSelected
+                    compact
                     onClick={() => selectFlight(f.uid)}
                   />
                 ))}
