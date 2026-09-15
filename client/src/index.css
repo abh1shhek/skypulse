@@ -856,7 +856,7 @@ button, input { font-family: inherit; }
 .ac {
   position: relative;
   z-index: 1;
-  color: rgba(232, 230, 225, 0.7);
+  color: rgba(232, 230, 225, 0.55);
   transform-origin: center;
 }
 .ac-wrap {
@@ -866,13 +866,16 @@ button, input { font-family: inherit; }
   display: grid;
   place-items: center;
 }
-.ac-wrap.is-selected .ac { color: var(--accent-2); }
+.ac-wrap.is-selected .ac {
+  color: var(--text);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 10px rgba(11, 12, 14, 0.7));
+}
 .ac-pulse {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
   animation: ac-radar 3.6s ease-out infinite;
   pointer-events: none;
 }
@@ -1039,6 +1042,21 @@ button, input { font-family: inherit; }
   height: 280px;
   border-radius: var(--radius-image);
 }
+.overview__brand {
+  min-height: 168px;
+  border-radius: var(--radius-image);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 80% 120%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 52%),
+    var(--grad-info),
+    var(--grad-elev);
+}
+.overview__brand .airline-logo--mark {
+  width: 64px;
+  height: 64px;
+  font-size: 16px;
+}
 .overview__feature-copy { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 8px; min-width: 0; }
 .overview__id { font-size: 13px; color: var(--muted); }
 .overview__status { margin: 6px 0 10px; font-size: 12px; color: var(--steel); }
@@ -1121,6 +1139,7 @@ button, input { font-family: inherit; }
 @media (max-width: 800px) {
   .overview__feature { grid-template-columns: 1fr; }
   .overview__slab { height: 200px; }
+  .overview__brand { min-height: 132px; }
   .overview__board button,
   .overview__board--watch button,
   .overview__board--pairs button { grid-template-columns: 1fr auto; }
@@ -1216,21 +1235,21 @@ button, input { font-family: inherit; }
   white-space: nowrap;
 }
 .apt__dot {
-  width: 11px;
-  height: 11px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
+  background: var(--info);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--info) 22%, transparent);
   flex-shrink: 0;
 }
-.apt--dest .apt__dot { background: var(--accent); }
+.apt--dest .apt__dot { background: var(--info-muted); box-shadow: 0 0 0 2px color-mix(in srgb, var(--info) 16%, transparent); }
 .apt__code {
   font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--accent-2);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--info);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
 }
 .ac-hud-icon { background: none !important; border: none !important; pointer-events: none !important; }
 .ac-hud {

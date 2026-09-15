@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import FlightMedia from './FlightMedia'
+import AirlineLogo from './AirlineLogo'
 import { getWeather } from '../services/api'
 import { formatClock, statusMeta } from '../lib/flightMath'
 import { AIRPORTS } from '../lib/airports'
@@ -302,7 +303,9 @@ export default function OperationsView({
             onClick={() => onSelect(lead.uid)}
             aria-label={`${lead.id}, ${lead.from} to ${lead.to}, ${leadStatus.label}`}
           >
-            <FlightMedia flight={lead} className="overview__slab" />
+            <div className="overview__brand" aria-hidden="true">
+              <AirlineLogo airline={lead.airline} size={64} />
+            </div>
             <div className="overview__feature-copy">
               <p className="overview__id num">{lead.id}</p>
               <p className={`overview__status tone-${leadStatus.tone}`}>{leadStatus.label}</p>

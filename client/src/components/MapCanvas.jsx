@@ -21,17 +21,19 @@ function safeCode(code) {
 }
 
 function aircraftIcon(flight, selected) {
-  const size = selected ? 18 : 13
+  const size = selected ? 28 : 14
   const rot = Math.round(flight.bearing || 0)
   const pulse = selected ? '<span class="ac-pulse"></span>' : ''
+  const box = selected ? 72 : 48
+  const anchor = box / 2
   return L.divIcon({
-    html: `<div class="ac-wrap${selected ? ' is-selected' : ''}">
+    html: `<div class="ac-wrap${selected ? ' is-selected' : ''}" style="width:${box}px;height:${box}px">
       ${pulse}
       <div class="ac" style="transform:rotate(${rot}deg)">${planeSvg(size)}</div>
     </div>`,
     className: 'ac-icon',
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
+    iconSize: [box, box],
+    iconAnchor: [anchor, anchor],
   })
 }
 
@@ -201,7 +203,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
         marker = L.marker([flight.lat, flight.lng], {
           icon: aircraftIcon(flight, selected),
           keyboard: false,
-          zIndexOffset: selected ? 800 : 0,
+          zIndexOffset: selected ? 1200 : 40,
         })
         marker.on('click', (e) => {
           L.DomEvent.stopPropagation(e)
@@ -216,7 +218,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
           marker.setIcon(aircraftIcon(flight, selected))
           iconStateRef.current[flight.uid] = key
         }
-        marker.setZIndexOffset(selected ? 800 : 0)
+        marker.setZIndexOffset(selected ? 1200 : 40)
       }
       marker._flight = flight
     })
@@ -246,30 +248,33 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
     const from = [selected.origin.lat, selected.origin.lng]
     const to = [selected.dest.lat, selected.dest.lng]
     const amber = cssToken('--route-flown', '#e59a3a')
-    const remainOp = routeHighlight ? 0.85 : 0.72
+    const steel = cssToken('--route-remain', '#7896c2')
+    const remainOp = routeHighlight ? 0.55 : 0.38
+    const flownW = routeHighlight ? 2.4 : 2
+    const remainW = routeHighlight ? 1.8 : 1.5
 
     if (!routeRef.current) {
       const group = L.layerGroup()
       const halo = L.polyline(path, {
-        color: amber,
-        weight: 8,
-        opacity: 0.22,
+        color: steel,
+        weight: 4,
+        opacity: 0.08,
         lineCap: 'round',
         interactive: false,
       }).addTo(group)
       const remainLine = L.polyline(remain, {
-        color: amber,
-        weight: 2.6,
+        color: steel,
+        weight: remainW,
         opacity: remainOp,
-        dashArray: '5 7',
+        dashArray: '4 8',
         lineCap: 'round',
         className: 'route-remain',
         interactive: false,
       }).addTo(group)
       const flownLine = L.polyline(flown, {
         color: amber,
-        weight: routeHighlight ? 4.2 : 3.6,
-        opacity: 1,
+        weight: flownW,
+        opacity: 0.72,
         lineCap: 'round',
         interactive: false,
       }).addTo(group)
@@ -291,10 +296,10 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       const layer = routeRef.current
       layer.halo.setLatLngs(path)
       layer.remainLine.setLatLngs(remain)
-      layer.halo.setStyle({ color: amber, opacity: 0.22, weight: 8 })
-      layer.remainLine.setStyle({ color: amber, opacity: remainOp, weight: routeHighlight ? 3 : 2.6 })
+      layer.halo.setStyle({ color: steel, opacity: 0.08, weight: 4 })
+      layer.remainLine.setStyle({ color: steel, opacity: remainOp, weight: remainW })
       layer.flownLine.setLatLngs(flown)
-      layer.flownLine.setStyle({ color: amber, opacity: 1, weight: routeHighlight ? 4.2 : 3.6 })
+      layer.flownLine.setStyle({ color: amber, opacity: 0.72, weight: flownW })
       layer.originM.setLatLng(from)
       layer.destM.setLatLng(to)
       if (layer.from !== selected.from) {
@@ -315,7 +320,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
           icon: hudIcon(selected),
           interactive: false,
           keyboard: false,
-          zIndexOffset: 850,
+          zIndexOffset: 1400,
         }).addTo(map),
         key: hk,
       }
