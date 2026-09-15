@@ -30,7 +30,7 @@ const useFlightStore = create((set, get) => ({
   flights: [],
   news: [],
   selectedId: null,
-  loading: false,
+  loading: true,
   error: null,
   query: '',
   nav: navFromHash(),
@@ -51,14 +51,17 @@ const useFlightStore = create((set, get) => ({
     set({ loading: true, error: null })
     try {
       const data = await getFlights(params)
+      if (!Array.isArray(data)) throw new Error('Invalid flights payload')
       const flights = enrichFlights(data)
+      const selectedId = get().selectedId
+      const stillThere = selectedId && flights.some((f) => f.uid === selectedId)
       set({
         flights,
         loading: false,
-        selectedId: get().selectedId || flights[0]?.uid || null,
+        selectedId: stillThere ? selectedId : flights[0]?.uid || null,
       })
     } catch {
-      set({ error: 'Failed to load flights', loading: false })
+      set({ error: 'Failed to load flights', loading: false, flights: [] })
     }
   },
 
@@ -85,13 +88,9 @@ const useFlightStore = create((set, get) => ({
     writeHash(nav)
   },
   syncNavFromLocation: () => {
-    const id = typeof window === 'undefined' ? 'tracking' : window.location.hash.replace(/^#/, '')
-    if (NAV_IDS.includes(id)) {
-      set({ nav: id })
-      return
-    }
-    set({ nav: 'tracking' })
-    writeHash('tracking', true)
+    const next = navFromHash()
+    if (get().nav === next) return
+    set({ nav: next })
   },
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
 }))

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { geodesicPoints } from '../lib/flightMath'
@@ -122,10 +122,11 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
   useEffect(() => { followRef.current = follow }, [follow])
   useEffect(() => { onFollowChangeRef.current = onFollowChange }, [onFollowChange])
 
-  useEffect(() => {
-    if (instanceRef.current || !mapRef.current) return
+  useLayoutEffect(() => {
+    const el = mapRef.current
+    if (instanceRef.current || !el) return
 
-    const map = L.map(mapRef.current, {
+    const map = L.map(el, {
       center: [22.5, 78.5],
       zoom: 5,
       zoomControl: false,
@@ -170,9 +171,12 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       },
     })
     setMapReady(true)
-    requestAnimationFrame(() => map.invalidateSize())
+    map.invalidateSize()
+    const ro = new ResizeObserver(() => map.invalidateSize())
+    ro.observe(el)
 
     return () => {
+      ro.disconnect()
       map.remove()
       instanceRef.current = null
       markersRef.current = {}

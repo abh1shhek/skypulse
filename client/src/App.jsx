@@ -47,7 +47,7 @@ export default function App() {
   useEffect(() => {
     fetchFlights({ dep_iata: 'DEL' })
     fetchNews('aviation')
-  }, [])
+  }, [fetchFlights, fetchNews])
 
   useEffect(() => {
     syncNavFromLocation()
