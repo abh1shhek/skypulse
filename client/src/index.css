@@ -388,6 +388,24 @@ button, input { font-family: inherit; }
   overflow: hidden;
   background: var(--bg);
 }
+.detail__brand {
+  position: relative;
+  height: 108px;
+  min-height: 108px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 80% 120%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 52%),
+    var(--grad-info),
+    var(--grad-elev);
+}
+.detail__brand img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+}
 
 .pill {
   font-family: var(--mono);

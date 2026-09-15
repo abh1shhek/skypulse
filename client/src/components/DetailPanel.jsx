@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { formatClock, statusMeta } from '../lib/flightMath'
 import AnimatedNumber from './AnimatedNumber'
 import { I, Icon } from './icons'
-import FlightMedia from './FlightMedia'
+import { AirlineBrand } from './AirlineLogo'
 import RouteArc from './RouteArc'
 
 function toFeet(meters) {
@@ -38,7 +38,7 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
       </header>
 
       <div className="detail__scroll">
-        <FlightMedia flight={flight} className="detail__visual" />
+        <AirlineBrand airline={flight.airline} />
 
         <div className="route-codes">
           <div>
