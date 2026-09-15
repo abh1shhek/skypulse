@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import aircraftHero from '../assets/aircraft-hero.png'
 import { formatClock, statusMeta } from '../lib/flightMath'
 import AnimatedNumber from './AnimatedNumber'
 import { I, Icon } from './icons'
+import FlightMedia from './FlightMedia'
 import RouteArc from './RouteArc'
 
 function toFeet(meters) {
@@ -37,9 +37,7 @@ export default function DetailPanel({ flight, onClose, followed, onFollow, onRou
       </header>
 
       <div className="detail__scroll">
-        <div className="detail__visual sp-slab">
-          <img src={aircraftHero} alt="" />
-        </div>
+        <FlightMedia flight={flight} className="detail__visual" />
 
         <div className="route-codes">
           <div>

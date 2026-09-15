@@ -1,23 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { formatClock, statusMeta } from '../lib/flightMath'
-
-const COLORS = {
-  'Air India': '#c81e1e',
-  IndiGo: '#3b1c7a',
-  Vistara: '#4e2683',
-  SpiceJet: '#d01928',
-  Akasa: '#e85d04',
-  Emirates: '#c8102e',
-  'Air Arabia': '#ed1c24',
-}
+import FlightMedia from './FlightMedia'
 
 export default function FlightCard({ flight, selected, onClick, followed = false, pinSelected = false }) {
   const ref = useRef(null)
-  const color = COLORS[flight.airline] || '#3a3a42'
-  const initials = (flight.airline || '??').slice(0, 2).toUpperCase()
   const st = statusMeta(flight.status)
   const dep = formatClock(flight.scheduled?.[0])
   const arr = formatClock(flight.scheduled?.[1])
+  const pct = Math.max(4, Math.min(96, (flight.progress || 0) * 100))
 
   useEffect(() => {
     if (!selected || !pinSelected || !ref.current) return
@@ -38,26 +28,22 @@ export default function FlightCard({ flight, selected, onClick, followed = false
       aria-current={selected ? 'true' : undefined}
       aria-label={`${flight.id}, ${flight.from} to ${flight.to}, ${st.label}`}
     >
-      <div className="fcard__top">
-        <div className="fcard__ident">
-          <div className="badge" style={{ background: color }} aria-hidden="true">{initials}</div>
+      <FlightMedia flight={flight} className="fcard__media" />
+      <div className="fcard__body">
+        <div className="fcard__top">
           <strong>{flight.id}</strong>
+          <span className={`fcard__status tone-${st.tone}`}>{st.label}</span>
         </div>
-        <div className={`fcard__status tone-${st.tone}`}>
-          <i className={`status-dot ${st.tone}`} />
-          {st.label}
-        </div>
-      </div>
-
-      <div className="fcard__route">
-        <span className="iata">{flight.from}</span>
-        <span className="fcard__arrow" aria-hidden="true">→</span>
-        <span className="iata">{flight.to}</span>
-      </div>
-
-      <div className="fcard__foot">
-        <span>{flight.aircraft} · {dep} → {arr}</span>
-        {followed ? <em>Watching</em> : null}
+        <p className="fcard__route">
+          <span className="iata">{flight.from}</span>
+          <span className="fcard__arrow" aria-hidden="true">→</span>
+          <span className="iata">{flight.to}</span>
+        </p>
+        <p className="fcard__foot">
+          {flight.aircraft} · {dep} → {arr}
+          {followed ? <em>Watching</em> : null}
+        </p>
+        <span className="fcard__progress" style={{ width: `${pct}%` }} aria-hidden="true" />
       </div>
     </button>
   )
