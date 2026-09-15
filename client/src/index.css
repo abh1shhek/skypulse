@@ -555,9 +555,11 @@ button, input { font-family: inherit; }
   flex: 0 0 248px;
   scroll-snap-align: start;
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
   min-height: 108px;
-  padding: 0;
+  padding: 10px 12px;
   overflow: hidden;
   cursor: pointer;
   background: rgba(12, 12, 14, 0.72);
@@ -572,12 +574,41 @@ button, input { font-family: inherit; }
   position: relative;
 }
 .fcard--strip {
-  flex: 0 0 196px;
-  grid-template-columns: 1fr;
+  flex: 0 0 210px;
   min-height: 78px;
   height: 78px;
   background: rgba(12, 12, 14, 0.78);
 }
+.fcard--board {
+  flex: none;
+  width: 100%;
+  min-height: 76px;
+  height: auto;
+  grid-template-columns: 32px 1fr auto;
+  padding: 14px 16px;
+  background: var(--grad-elev);
+}
+.airline-logo {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.airline-logo--mark {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--elev);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+.fcard__glyph {
+  color: var(--steel);
+  display: grid;
+  place-items: center;
+}
+.fcard.is-selected .fcard__glyph { color: var(--accent); }
 .live-strip .fcard { opacity: 0.48; }
 .live-strip .fcard:hover,
 .live-strip .fcard:focus-visible,
@@ -588,10 +619,8 @@ button, input { font-family: inherit; }
 .ops-list .fcard {
   flex: none;
   width: 100%;
-  grid-template-columns: 1fr;
   height: auto;
 }
-.ops-list .fcard__media { height: 92px; }
 .fcard.is-selected { box-shadow: inset 2px 0 0 var(--accent); }
 .fcard:focus-visible {
   outline: var(--focus);
@@ -638,16 +667,17 @@ button, input { font-family: inherit; }
 
 .fcard__body {
   position: relative;
-  padding: 10px 12px 14px;
+  padding: 0;
   min-width: 0;
 }
 .fcard--strip .fcard__body {
-  padding: 10px 12px 12px 14px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   height: 100%;
 }
+.fcard--board .fcard__body { padding: 0; }
 .fcard__top, .fcard__route, .fcard__foot {
   display: flex;
   align-items: center;
@@ -1057,7 +1087,7 @@ button, input { font-family: inherit; }
   .overview__metrics > div { padding: 12px 0; border-left: 0; border-top: 1px solid var(--line); }
   .overview__metrics > div:first-child { padding-left: 0; border-top: 0; }
 }
-.ops-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
+.ops-list { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
 .ops-link {
   margin-top: 16px;
   background: none;
@@ -1138,23 +1168,24 @@ button, input { font-family: inherit; }
 .apt {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
 }
 .apt__dot {
-  width: 6px;
-  height: 6px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
   flex-shrink: 0;
 }
-.apt--dest .apt__dot { background: var(--info); }
+.apt--dest .apt__dot { background: var(--accent); }
 .apt__code {
   font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  color: #ece8e0;
+  color: var(--accent-2);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 .ac-hud-icon { background: none !important; border: none !important; pointer-events: none !important; }

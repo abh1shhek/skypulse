@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { formatClock, statusMeta } from '../lib/flightMath'
-import FlightMedia from './FlightMedia'
 import { PlaneGlyph } from './icons'
+import AirlineLogo from './AirlineLogo'
 
 export default function FlightCard({ flight, selected, onClick, followed = false, pinSelected = false, compact = false }) {
   const ref = useRef(null)
@@ -24,19 +24,14 @@ export default function FlightCard({ flight, selected, onClick, followed = false
     <button
       ref={ref}
       type="button"
-      className={`fcard ${compact ? 'fcard--strip' : ''} ${selected ? 'is-selected' : ''}`}
+      className={`fcard ${compact ? 'fcard--strip' : 'fcard--board'} ${selected ? 'is-selected' : ''}`}
       onClick={onClick}
       aria-current={selected ? 'true' : undefined}
       aria-label={`${flight.id}, ${flight.from} to ${flight.to}, ${st.label}`}
     >
-      {!compact && <FlightMedia flight={flight} className="fcard__media" />}
+      <AirlineLogo airline={flight.airline} size={compact ? 22 : 30} />
       <div className="fcard__body">
         <div className="fcard__top">
-          {compact && (
-            <span className="fcard__mark" aria-hidden="true">
-              <PlaneGlyph size={12} />
-            </span>
-          )}
           <strong>{flight.id}</strong>
           <span className={`fcard__status tone-${st.tone}`}>{st.label}</span>
         </div>
@@ -52,8 +47,13 @@ export default function FlightCard({ flight, selected, onClick, followed = false
           {dep} → {arr}
           {followed ? <em>Watching</em> : null}
         </p>
-        <span className="fcard__progress" style={{ width: `${pct}%` }} aria-hidden="true" />
       </div>
+      {!compact && (
+        <span className="fcard__glyph" aria-hidden="true">
+          <PlaneGlyph size={16} />
+        </span>
+      )}
+      <span className="fcard__progress" style={{ width: `${pct}%` }} aria-hidden="true" />
     </button>
   )
 }

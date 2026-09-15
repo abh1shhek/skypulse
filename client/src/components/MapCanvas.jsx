@@ -40,8 +40,8 @@ function airportIcon(code, kind) {
   return L.divIcon({
     html: `<div class="apt apt--${kind}"><span class="apt__dot"></span><span class="apt__code">${label}</span></div>`,
     className: 'apt-icon',
-    iconSize: [78, 24],
-    iconAnchor: [5, 12],
+    iconSize: [92, 28],
+    iconAnchor: [6, 14],
   })
 }
 
@@ -241,31 +241,31 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
     const path = flown.concat(remain.slice(1))
     const from = [selected.origin.lat, selected.origin.lng]
     const to = [selected.dest.lat, selected.dest.lng]
-    const accent = routeHighlight ? 1 : 0.95
-    const remainOp = routeHighlight ? 0.55 : 0.38
+    const amber = cssToken('--route-flown', '#e59a3a')
+    const remainOp = routeHighlight ? 0.85 : 0.72
 
     if (!routeRef.current) {
       const group = L.layerGroup()
       const halo = L.polyline(path, {
-        color: '#050506',
-        weight: 6,
-        opacity: 0.4,
+        color: amber,
+        weight: 8,
+        opacity: 0.22,
         lineCap: 'round',
         interactive: false,
       }).addTo(group)
       const remainLine = L.polyline(remain, {
-        color: cssToken('--route-remain', '#7896c2'),
-        weight: 1.4,
+        color: amber,
+        weight: 2.6,
         opacity: remainOp,
-        dashArray: '3 8',
+        dashArray: '5 7',
         lineCap: 'round',
         className: 'route-remain',
         interactive: false,
       }).addTo(group)
       const flownLine = L.polyline(flown, {
-        color: cssToken('--route-flown', '#e59a3a'),
-        weight: routeHighlight ? 2.8 : 2.1,
-        opacity: accent,
+        color: amber,
+        weight: routeHighlight ? 4.2 : 3.6,
+        opacity: 1,
         lineCap: 'round',
         interactive: false,
       }).addTo(group)
@@ -287,9 +287,10 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       const layer = routeRef.current
       layer.halo.setLatLngs(path)
       layer.remainLine.setLatLngs(remain)
-      layer.remainLine.setStyle({ opacity: remainOp, weight: routeHighlight ? 1.7 : 1.4 })
+      layer.halo.setStyle({ color: amber, opacity: 0.22, weight: 8 })
+      layer.remainLine.setStyle({ color: amber, opacity: remainOp, weight: routeHighlight ? 3 : 2.6 })
       layer.flownLine.setLatLngs(flown)
-      layer.flownLine.setStyle({ opacity: accent, weight: routeHighlight ? 2.8 : 2.1 })
+      layer.flownLine.setStyle({ color: amber, opacity: 1, weight: routeHighlight ? 4.2 : 3.6 })
       layer.originM.setLatLng(from)
       layer.destM.setLatLng(to)
       if (layer.from !== selected.from) {
