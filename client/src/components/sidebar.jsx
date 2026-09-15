@@ -56,12 +56,9 @@ export default function Sidebar() {
     >
       <div className="rail__brand">
         <div className="rail__mark">
-          <BrandMark size={30} />
+          <BrandMark size={48} />
         </div>
-        <div className="rail__name" aria-label="SkyPulse">
-          <span className="rail__name-sky">SKY</span>
-          <span className="rail__name-pulse">PULSE</span>
-        </div>
+        <div className="rail__name">SkyPulse</div>
         <button
           type="button"
           className="rail__close"
