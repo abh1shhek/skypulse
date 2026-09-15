@@ -1087,6 +1087,30 @@ button, input { font-family: inherit; }
 .overview__board .tone-alert { color: var(--alert); font-size: 12px; }
 .overview__board .tone-idle { color: var(--steel); font-size: 12px; }
 .overview__board button .num:last-child { text-align: right; color: var(--text); }
+.overview__feature--route { grid-template-columns: 1fr; max-width: 36rem; }
+.overview__track {
+  display: block;
+  margin-top: 18px;
+  height: 2px;
+  width: min(280px, 100%);
+  background: var(--line);
+}
+.overview__track > i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.overview__board--watch button {
+  grid-template-columns: 88px 1fr auto minmax(9rem, auto);
+}
+.overview__board--watch button .num:last-child { font-size: 11px; color: var(--muted); }
+.overview__board--pairs button {
+  grid-template-columns: 1.1fr 1fr auto 36px;
+}
+.overview__board--pairs button > span:nth-child(2) {
+  color: var(--muted);
+  font-size: 13px;
+}
 .overview__brief { list-style: none; }
 .overview__brief li { padding: 14px 0; border-top: 1px solid var(--line); }
 .overview__brief a { color: var(--text); text-decoration: none; font-size: 15px; line-height: 1.45; }
@@ -1097,7 +1121,9 @@ button, input { font-family: inherit; }
 @media (max-width: 800px) {
   .overview__feature { grid-template-columns: 1fr; }
   .overview__slab { height: 200px; }
-  .overview__board button { grid-template-columns: 1fr auto; }
+  .overview__board button,
+  .overview__board--watch button,
+  .overview__board--pairs button { grid-template-columns: 1fr auto; }
   .overview__board .iata { grid-column: 1 / -1; }
 }
 @media (max-width: 560px) {
