@@ -48,8 +48,8 @@ button, input { font-family: inherit; }
   z-index: 2;
   background:
     var(--vignette),
-    linear-gradient(90deg, rgba(8, 8, 10, 0.52) 0%, transparent 28%),
-    linear-gradient(0deg, rgba(8, 8, 10, 0.55) 0%, transparent 28%);
+    linear-gradient(90deg, rgba(11, 16, 24, 0.58) 0%, transparent 28%),
+    linear-gradient(0deg, rgba(11, 12, 14, 0.55) 0%, transparent 28%);
 }
 
 /* ─── Sidebar ─── */
@@ -135,7 +135,7 @@ button, input { font-family: inherit; }
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #1b140c;
+  color: var(--ink-on-accent);
   font-size: var(--text-ui);
   font-weight: 500;
   cursor: pointer;
@@ -317,8 +317,7 @@ button, input { font-family: inherit; }
   z-index: 1200;
   display: flex;
   flex-direction: column;
-  background:
-    linear-gradient(180deg, rgba(18, 18, 20, 0.88) 0%, rgba(11, 11, 13, 0.78) 100%);
+  background: var(--grad-elev);
   backdrop-filter: blur(22px) saturate(118%);
   -webkit-backdrop-filter: blur(22px) saturate(118%);
   border: 0;
@@ -387,7 +386,7 @@ button, input { font-family: inherit; }
   height: 88px;
   min-height: 88px;
   overflow: hidden;
-  background: #0d0d10;
+  background: var(--bg);
 }
 
 .pill {
@@ -473,7 +472,7 @@ button, input { font-family: inherit; }
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: #ecece6;
+  color: var(--info);
   letter-spacing: -0.02em;
 }
 
@@ -504,7 +503,7 @@ button, input { font-family: inherit; }
 .route-arc__bar i {
   display: block;
   height: 100%;
-  background: var(--accent);
+  background: var(--grad-progress);
   transition: width 0.4s var(--ease-out);
 }
 .route-arc__meta {
@@ -617,7 +616,7 @@ button, input { font-family: inherit; }
 .flight-media {
   position: relative;
   overflow: hidden;
-  background: #0d0d10;
+  background: var(--bg);
   min-height: 100%;
 }
 .flight-media img {
@@ -709,7 +708,10 @@ button, input { font-family: inherit; }
   background: var(--accent);
   opacity: 0.35;
 }
-.fcard.is-selected .fcard__progress { opacity: 1; }
+.fcard.is-selected .fcard__progress {
+  opacity: 1;
+  background: var(--grad-progress);
+}
 .status-dot { width: 5px; height: 5px; border-radius: 50%; background: #5a5a56; }
 .status-dot.live { background: var(--live); }
 .status-dot.warn { background: var(--warn); }
@@ -749,13 +751,13 @@ button, input { font-family: inherit; }
 .zoom { display: flex; flex-direction: column; }
 .zoom button {
   width: 32px; height: 30px;
-  color: #c8c8ce;
+  color: var(--muted);
   cursor: pointer;
   font-size: 15px;
-  background: rgba(18, 18, 20, 0.78);
+  background: var(--glass);
   transition: background 0.15s ease, color 0.15s ease, transform 0.12s var(--ease-out);
 }
-.zoom button:hover { background: #1f1f24; color: #fff; }
+.zoom button:hover { background: var(--elev); color: var(--info); }
 .zoom button:active { transform: scale(0.96); }
 .zoom button:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; border-bottom: 1px solid var(--line); }
 .zoom button:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
@@ -795,7 +797,7 @@ button, input { font-family: inherit; }
 }
 
 /* ─── Map markers ─── */
-.leaflet-container { background: #0b0b0d !important; z-index: 0 !important; }
+.leaflet-container { background: var(--bg) !important; z-index: 0 !important; }
 .leaflet-tile-pane { filter: grayscale(1) brightness(0.36) contrast(1.04); }
 .leaflet-control-attribution {
   background: transparent !important;
@@ -815,13 +817,13 @@ button, input { font-family: inherit; }
   display: grid;
   place-items: center;
 }
-.ac-wrap.is-selected .ac { color: #ead7b8; }
+.ac-wrap.is-selected .ac { color: var(--accent-2); }
 .ac-pulse {
   position: absolute;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(196, 132, 58, 0.45);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   animation: ac-radar 3.6s ease-out infinite;
   pointer-events: none;
 }
@@ -1039,7 +1041,7 @@ button, input { font-family: inherit; }
 .overview__brief { list-style: none; }
 .overview__brief li { padding: 14px 0; border-top: 1px solid var(--line); }
 .overview__brief a { color: var(--text); text-decoration: none; font-size: 15px; line-height: 1.45; }
-.overview__brief a:hover { color: var(--steel); }
+.overview__brief a:hover { color: var(--info); }
 .overview__brief span { display: block; margin-top: 6px; font-size: 11px; color: var(--dim); }
 .overview__empty { margin-top: var(--space-6); color: var(--muted); }
 .overview__empty strong { display: block; color: var(--text); font-size: 16px; margin-bottom: 6px; }
@@ -1069,7 +1071,7 @@ button, input { font-family: inherit; }
 .ops-link:disabled { opacity: 0.4; cursor: default; }
 .ops-wx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
 .ops-wx { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-.ops-wx strong { display: block; font-family: var(--mono); font-size: 32px; margin: 8px 0 4px; }
+.ops-wx strong { display: block; font-family: var(--mono); font-size: 32px; margin: 8px 0 4px; color: var(--info); }
 .ops-wx p { color: var(--muted); font-size: 13px; }
 .ops-wx dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
 .ops-wx dt { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
@@ -1093,7 +1095,7 @@ button, input { font-family: inherit; }
 .ops-routes .iata { font-size: 22px; }
 .ops-routes__arrow { color: var(--dim); }
 .ops-routes em { font-style: normal; font-size: 12px; color: var(--muted); }
-.ops-routes strong { font-family: var(--mono); color: var(--accent); }
+.ops-routes strong { font-family: var(--mono); color: var(--info); }
 .ops-settings { display: grid; gap: 16px; margin-top: 28px; }
 .ops-settings > div { padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .ops-settings p { color: var(--muted); font-size: 13px; margin: 8px 0 0; line-height: 1.5; }
@@ -1101,7 +1103,7 @@ button, input { font-family: inherit; }
 .ops-support li { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .ops-support strong { display: block; margin-bottom: 6px; }
 .ops-support span, .ops-support a { color: var(--muted); font-size: 13px; }
-.ops-support a { color: var(--accent-2); }
+.ops-support a { color: var(--info); }
 .hud__chip { cursor: default; }
 .hud button.hud__chip { cursor: pointer; }
 @media (max-width: 700px) { .ops-wx-grid { grid-template-columns: 1fr; } .ops-routes button { grid-template-columns: 1fr; } }
@@ -1145,7 +1147,7 @@ button, input { font-family: inherit; }
   background: var(--accent);
   flex-shrink: 0;
 }
-.apt--dest .apt__dot { background: var(--steel); }
+.apt--dest .apt__dot { background: var(--info); }
 .apt__code {
   font-family: var(--sans);
   font-size: 11px;
@@ -1173,7 +1175,7 @@ button, input { font-family: inherit; }
   margin-top: 1px;
   font-family: var(--mono);
   font-size: 10px;
-  color: #b0b0a8;
+  color: var(--info);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 .route-remain {

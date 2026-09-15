@@ -1,21 +1,24 @@
 /* SkyPulse 2.0 design tokens + primitives. Pages consume these; do not restyle locally. */
 
 :root {
-  --bg: #0b0b0d;
-  --rail: #101012;
-  --surface: #141416;
-  --surface-solid: #141416;
-  --elev: #1a1a1d;
+  --bg: #0b0c0e;
+  --rail: #111316;
+  --surface: #17191d;
+  --surface-solid: #17191d;
+  --elev: #1d2026;
   --line: rgba(255, 255, 255, 0.07);
   --line-strong: rgba(255, 255, 255, 0.12);
   --text: #e8e6e1;
   --muted: #8c8c86;
   --dim: #5c5c58;
-  --steel: #8a93a0;
-  --accent: #c4843a;
-  --accent-2: #d9a05a;
+  --steel: #8a8f96;
+  --accent: #e59a3a;
+  --accent-2: #f0b25a;
+  --ink-on-accent: #1b140c;
+  --info: #7896c2;
+  --info-muted: rgba(120, 150, 194, 0.55);
   --live: #6f9f6f;
-  --warn: #c9a15b;
+  --warn: #d4a04a;
   --alert: #c45c4a;
 
   --space-1: 4px;
@@ -35,18 +38,20 @@
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.28);
 
-  --glass: rgba(12, 12, 14, 0.78);
-  --glass-strong: rgba(11, 11, 13, 0.88);
+  --glass: rgba(11, 12, 14, 0.8);
+  --glass-strong: rgba(11, 12, 14, 0.9);
   --glass-line: rgba(255, 255, 255, 0.08);
 
-  --vignette: radial-gradient(115% 88% at 50% 42%, transparent 36%, rgba(0, 0, 0, 0.62) 100%);
-  --image-fade: linear-gradient(180deg, transparent 40%, rgba(11, 11, 13, 0.92) 100%);
-  --route-flown: #c4843a;
-  --route-remain: #8a93a0;
+  --vignette: radial-gradient(115% 88% at 50% 42%, transparent 36%, rgba(8, 12, 18, 0.72) 100%);
+  --image-fade: linear-gradient(180deg, transparent 40%, rgba(11, 12, 14, 0.92) 100%);
+  --grad-elev: linear-gradient(180deg, rgba(23, 25, 29, 0.92) 0%, rgba(11, 16, 24, 0.84) 100%);
+  --grad-progress: linear-gradient(90deg, #e59a3a 0%, #f0c078 100%);
+  --route-flown: #e59a3a;
+  --route-remain: #7896c2;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --duration: 200ms;
-  --focus: 1px solid rgba(196, 132, 58, 0.7);
+  --focus: 1px solid rgba(120, 150, 194, 0.72);
 
   --sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
@@ -117,7 +122,7 @@
 .sp-slab {
   overflow: hidden;
   border-radius: var(--radius-image);
-  background: #0d0d10;
+  background: var(--bg);
 }
 
 .sp-slab img {
