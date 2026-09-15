@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import FlightCard from './FlightCard'
+import FlightMedia from './FlightMedia'
 import { getWeather } from '../services/api'
-import { statusMeta } from '../lib/flightMath'
+import { formatClock, statusMeta } from '../lib/flightMath'
 import { AIRPORTS } from '../lib/airports'
 
 function Header({ eyebrow, title, detail }) {
@@ -154,32 +155,99 @@ export default function OperationsView({
   )
 
   if (nav === 'overview') {
+    const ranked = [...visible].sort((a, b) => (b.progress || 0) - (a.progress || 0))
+    const lead = ranked[0]
+    const board = ranked.slice(1, 6)
+    const briefs = news.filter((n) => n.url && n.url !== '#').slice(0, 4)
+    const leadPct = Math.round((lead?.progress || 0) * 100)
+    const leadStatus = lead ? statusMeta(lead.status) : null
+
     return (
-      <main className="ops-view">
-        <Header eyebrow="Operations center" title="Overview" detail="Network snapshot for the current Delhi departure window." />
-        <div className="ops-metrics">
-          <div><strong>{visible.length}</strong><span>Visible flights</span></div>
-          <div><strong>{active.length}</strong><span>Active routes</span></div>
-          <div><strong>{Object.keys(followed).length}</strong><span>On watch</span></div>
-        </div>
-        <section className="ops-view__section">
-          <div className="section-h"><i />Most progressed</div>
-          <FlightList
-            flights={[...visible].sort((a, b) => (b.progress || 0) - (a.progress || 0)).slice(0, 4)}
-            selectedId={selectedId}
-            followed={followed}
-            onSelect={onSelect}
-            empty="No flights in this window."
-          />
-        </section>
-        {news.filter((n) => n.url && n.url !== '#').length > 0 && (
-          <section className="ops-view__section">
-            <div className="section-h"><i />Ops brief</div>
-            <ul className="ops-brief-list">
-              {news.filter((n) => n.url && n.url !== '#').slice(0, 4).map((n) => (
+      <main className="ops-view overview">
+        <header className="overview__head">
+          <h1 className="sp-display">Overview</h1>
+          <p>Delhi departure window. Counts follow the live feed.</p>
+        </header>
+
+        <dl className="overview__metrics sp-inset">
+          <div>
+            <dt>Visible</dt>
+            <dd className="num">{visible.length}</dd>
+          </div>
+          <div>
+            <dt>Active</dt>
+            <dd className="num">{active.length}</dd>
+          </div>
+          <div>
+            <dt>Watching</dt>
+            <dd className="num">{Object.keys(followed).length}</dd>
+          </div>
+        </dl>
+
+        {!lead && (
+          <div className="overview__empty">
+            <strong>No flights in this window</strong>
+            <span>Open Live Tracking when the feed returns.</span>
+            {goLive}
+          </div>
+        )}
+
+        {lead && (
+          <button
+            type="button"
+            className="overview__feature"
+            onClick={() => onSelect(lead.uid)}
+            aria-label={`${lead.id}, ${lead.from} to ${lead.to}, ${leadStatus.label}`}
+          >
+            <FlightMedia flight={lead} className="overview__slab" />
+            <div className="overview__feature-copy">
+              <p className="overview__id num">{lead.id}</p>
+              <p className={`overview__status tone-${leadStatus.tone}`}>{leadStatus.label}</p>
+              <p className="overview__iata iata">
+                <span>{lead.from}</span>
+                <span aria-hidden="true">→</span>
+                <span>{lead.to}</span>
+              </p>
+              <p className="overview__meta">
+                {lead.fromCity} to {lead.toCity}
+              </p>
+              <p className="overview__meta">
+                {lead.aircraft} · {formatClock(lead.scheduled?.[0])} to {formatClock(lead.scheduled?.[1])} · {leadPct}% of route
+              </p>
+            </div>
+          </button>
+        )}
+
+        {board.length > 0 && (
+          <section className="overview__section">
+            <h2>On the board</h2>
+            <ul className="overview__board">
+              {board.map((flight) => {
+                const st = statusMeta(flight.status)
+                const pct = Math.round((flight.progress || 0) * 100)
+                return (
+                  <li key={flight.uid}>
+                    <button type="button" onClick={() => onSelect(flight.uid)}>
+                      <span className="num">{flight.id}</span>
+                      <span className="iata">{flight.from} → {flight.to}</span>
+                      <span className={`tone-${st.tone}`}>{st.label}</span>
+                      <span className="num">{pct}%</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        )}
+
+        {briefs.length > 0 && (
+          <section className="overview__section">
+            <h2>Ops brief</h2>
+            <ul className="overview__brief">
+              {briefs.map((n) => (
                 <li key={n.url}>
                   <a href={n.url} target="_blank" rel="noreferrer">{n.title}</a>
-                  <span>{n.source}</span>
+                  <span className="num">{n.source}</span>
                 </li>
               ))}
             </ul>
