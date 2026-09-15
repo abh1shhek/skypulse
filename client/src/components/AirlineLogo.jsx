@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { airlineInitials, airlineLogoSrc } from '../lib/airlineLogo'
-import cabin from '../assets/aircraft-hero.png'
 
 export default function AirlineLogo({ airline, size = 28 }) {
   const src = airlineLogoSrc(airline)
@@ -34,8 +33,10 @@ export function AirlineBrand({ airline }) {
 
   if (!src || failed) {
     return (
-      <div className="detail__visual flight-media">
-        <img src={cabin} alt="" />
+      <div className="detail__brand" aria-hidden="true">
+        <span className="airline-logo airline-logo--mark" style={{ width: 56, height: 56 }}>
+          {airlineInitials(airline)}
+        </span>
       </div>
     )
   }
