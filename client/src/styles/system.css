@@ -42,10 +42,11 @@
   --glass-strong: rgba(11, 12, 14, 0.9);
   --glass-line: rgba(255, 255, 255, 0.08);
 
-  --vignette: radial-gradient(115% 88% at 50% 42%, transparent 36%, rgba(8, 12, 18, 0.72) 100%);
+  --vignette: radial-gradient(115% 88% at 50% 42%, transparent 34%, rgba(8, 14, 22, 0.78) 100%);
   --image-fade: linear-gradient(180deg, transparent 40%, rgba(11, 12, 14, 0.92) 100%);
-  --grad-elev: linear-gradient(180deg, rgba(23, 25, 29, 0.92) 0%, rgba(11, 16, 24, 0.84) 100%);
+  --grad-elev: linear-gradient(165deg, #17191d 0%, #12151a 48%, #0e1520 100%);
   --grad-progress: linear-gradient(90deg, #e59a3a 0%, #f0c078 100%);
+  --grad-info: linear-gradient(180deg, rgba(120, 150, 194, 0.08) 0%, rgba(11, 12, 14, 0) 100%);
   --route-flown: #e59a3a;
   --route-remain: #7896c2;
 
@@ -107,7 +108,7 @@
 }
 
 .sp-scrim {
-  background: var(--glass);
+  background: var(--grad-elev);
   backdrop-filter: blur(18px) saturate(120%);
   -webkit-backdrop-filter: blur(18px) saturate(120%);
   border-radius: var(--radius-sm);

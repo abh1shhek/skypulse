@@ -134,7 +134,7 @@ button, input { font-family: inherit; }
   height: 36px;
   border: 0;
   border-radius: var(--radius-sm);
-  background: var(--accent);
+  background: var(--grad-progress);
   color: var(--ink-on-accent);
   font-size: var(--text-ui);
   font-weight: 500;
@@ -583,7 +583,7 @@ button, input { font-family: inherit; }
 .live-strip .fcard:focus-visible,
 .live-strip .fcard.is-selected { opacity: 1; }
 .live-strip .fcard.is-selected {
-  background: rgba(18, 16, 14, 0.92);
+  background: var(--grad-elev);
 }
 .ops-list .fcard {
   flex: none;
@@ -742,6 +742,7 @@ button, input { font-family: inherit; }
   border-radius: var(--radius-sm);
   font-size: var(--text-meta);
   letter-spacing: 0.04em;
+  background: var(--grad-info), var(--grad-elev);
 }
 .live-dot {
   width: 6px; height: 6px; border-radius: 50%;
