@@ -1,5 +1,6 @@
 import useFlightStore from '../store/useFlightStore'
 import { I, Icon } from './icons'
+import BrandMark from './BrandMark'
 
 const GROUPS = [
   {
@@ -54,10 +55,13 @@ export default function Sidebar() {
       aria-label="SkyPulse navigation"
     >
       <div className="rail__brand">
-        <div className="rail__mark" aria-hidden="true">
-          <Icon d={I.plane} size={13} />
+        <div className="rail__mark">
+          <BrandMark size={30} />
         </div>
-        <div className="rail__name">SkyPulse</div>
+        <div className="rail__name" aria-label="SkyPulse">
+          <span className="rail__name-sky">SKY</span>
+          <span className="rail__name-pulse">PULSE</span>
+        </div>
         <button
           type="button"
           className="rail__close"
