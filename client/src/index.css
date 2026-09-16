@@ -108,6 +108,7 @@ button, input { font-family: inherit; }
   letter-spacing: -0.03em;
   line-height: 1;
   color: var(--text);
+  white-space: nowrap;
 }
 
 .rail__search {
@@ -804,7 +805,8 @@ button, input { font-family: inherit; }
 .live-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--live);
-  animation: pulse 2.2s ease-in-out infinite;
+  transform-origin: center;
+  animation: live-breathe 2.6s ease-in-out infinite;
 }
 .zoom { display: flex; flex-direction: column; }
 .zoom button {
@@ -934,6 +936,10 @@ button, input { font-family: inherit; }
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
+}
+@keyframes live-breathe {
+  0%, 100% { opacity: 0.92; transform: scale(1); }
+  48% { opacity: 0.48; transform: scale(0.78); }
 }
 @keyframes ring {
   0% { transform: scale(0.86); opacity: 0.9; }
@@ -1297,4 +1303,5 @@ button, input { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .ac-pulse { animation: none; opacity: 0.35; }
   .route-remain { animation: none; }
+  .live-dot { animation: none; opacity: 1; transform: none; }
 }

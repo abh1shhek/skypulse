@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import useFlightStore from '../store/useFlightStore'
 import { I, Icon } from './icons'
 import BrandMark from './BrandMark'
@@ -38,6 +39,57 @@ function isActive(nav, id) {
   return nav === id
 }
 
+const WORDMARK = 'SkyPulse'
+const DECODE_FRAMES = ['5kyPulse', 'SkyPu1se', 'SkvPulse', '5kyPu1se', WORDMARK]
+const DECODE_MS = 400
+
+function Wordmark() {
+  const [label, setLabel] = useState(WORDMARK)
+  const runRef = useRef(0)
+  const timersRef = useRef([])
+
+  const clearTimers = () => {
+    timersRef.current.forEach((id) => clearTimeout(id))
+    timersRef.current = []
+  }
+
+  const resolve = () => {
+    clearTimers()
+    runRef.current += 1
+    setLabel(WORDMARK)
+  }
+
+  const flicker = () => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    clearTimers()
+    const run = ++runRef.current
+    const step = Math.round(DECODE_MS / DECODE_FRAMES.length)
+    DECODE_FRAMES.forEach((frame, i) => {
+      const id = setTimeout(() => {
+        if (runRef.current !== run) return
+        setLabel(frame)
+      }, step * i)
+      timersRef.current.push(id)
+    })
+  }
+
+  useEffect(() => () => {
+    clearTimers()
+  }, [])
+
+  return (
+    <div
+      className="rail__name"
+      onMouseEnter={flicker}
+      onMouseLeave={resolve}
+      onPointerEnter={flicker}
+      onPointerLeave={resolve}
+    >
+      {label}
+    </div>
+  )
+}
+
 export default function Sidebar() {
   const { query, setQuery, nav, setNav, sidebarOpen, setSidebarOpen, setSelected, flights, news } = useFlightStore()
 
@@ -58,7 +110,7 @@ export default function Sidebar() {
         <div className="rail__mark">
           <BrandMark size={48} />
         </div>
-        <div className="rail__name">SkyPulse</div>
+        <Wordmark />
         <button
           type="button"
           className="rail__close"
