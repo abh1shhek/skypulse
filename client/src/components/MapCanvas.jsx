@@ -23,7 +23,9 @@ function safeCode(code) {
 function aircraftIcon(flight, selected) {
   const size = selected ? 28 : 14
   const rot = Math.round(flight.bearing || 0)
-  const pulse = selected ? '<span class="ac-pulse"></span>' : ''
+  const pulse = selected
+    ? '<span class="ac-pulse"></span><span class="ac-pulse ac-pulse--late"></span>'
+    : ''
   const box = selected ? 72 : 48
   const anchor = box / 2
   return L.divIcon({
@@ -72,7 +74,45 @@ function hudKey(flight) {
 }
 
 function iconKey(flight, selected) {
-  return `${selected ? 1 : 0}:${Math.round((flight.bearing || 0) / 2)}`
+  return selected ? '1' : '0'
+}
+
+function setAircraftRotation(marker, bearing) {
+  const el = marker.getElement()?.querySelector('.ac')
+  if (el) el.style.transform = `rotate(${Math.round(bearing || 0)}deg)`
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+}
+
+function revealPath(pts, t) {
+  if (!pts.length) return []
+  if (t >= 1 || pts.length < 2) return pts
+  if (t <= 0) return [pts[0]]
+  const span = pts.length - 1
+  const f = t * span
+  const i = Math.min(span - 1, Math.floor(f))
+  const frac = f - i
+  const out = pts.slice(0, i + 1)
+  const a = pts[i]
+  const b = pts[i + 1]
+  out.push([a[0] + (b[0] - a[0]) * frac, a[1] + (b[1] - a[1]) * frac])
+  return out
+}
+
+function drawSplit(flown, remain, t) {
+  const path = flown.concat(remain.slice(1))
+  if (t >= 1) return { flown, remain, path }
+  const drawn = revealPath(path, t)
+  const cut = Math.max(0, flown.length - 1)
+  if (drawn.length <= 1) return { flown: drawn, remain: [], path }
+  if (drawn.length - 1 <= cut) return { flown: drawn, remain: [], path }
+  return {
+    flown: flown.length ? flown : [drawn[0]],
+    remain: drawn.slice(cut),
+    path: drawn,
+  }
 }
 
 function nearestFlight(map, latlng, flights) {
@@ -115,6 +155,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
   const onFollowChangeRef = useRef(onFollowChange)
   const highlightTimeoutRef = useRef(null)
   const lastFitRef = useRef(null)
+  const drawRef = useRef({ key: null, t: 1, start: 0, raf: 0 })
   const [mapReady, setMapReady] = useState(false)
   const [routeHighlight, setRouteHighlight] = useState(false)
 
@@ -185,6 +226,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       routeRef.current = null
       hudRef.current = null
       if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current)
+      if (drawRef.current.raf) cancelAnimationFrame(drawRef.current.raf)
     }
   }, [])
 
@@ -217,6 +259,8 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
         if (iconStateRef.current[flight.uid] !== key) {
           marker.setIcon(aircraftIcon(flight, selected))
           iconStateRef.current[flight.uid] = key
+        } else {
+          setAircraftRotation(marker, flight.bearing)
         }
         marker.setZIndexOffset(selected ? 1200 : 40)
       }
@@ -240,11 +284,11 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
         map.removeLayer(hudRef.current.marker)
         hudRef.current = null
       }
+      if (drawRef.current.raf) cancelAnimationFrame(drawRef.current.raf)
+      drawRef.current.key = null
       return
     }
 
-    const { flown, remain } = splitRoute(selected.origin, selected.dest, selected.progress)
-    const path = flown.concat(remain.slice(1))
     const from = [selected.origin.lat, selected.origin.lng]
     const to = [selected.dest.lat, selected.dest.lng]
     const amber = cssToken('--route-flown', '#e59a3a')
@@ -252,65 +296,101 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
     const remainOp = routeHighlight ? 0.55 : 0.38
     const flownW = routeHighlight ? 2.4 : 2
     const remainW = routeHighlight ? 1.8 : 1.5
+    const DRAW_MS = 820
+    const lineOpts = { lineCap: 'round', interactive: false, smoothFactor: 0 }
 
-    if (!routeRef.current) {
-      const group = L.layerGroup()
-      const halo = L.polyline(path, {
-        color: steel,
-        weight: 4,
-        opacity: 0.08,
-        lineCap: 'round',
-        interactive: false,
-      }).addTo(group)
-      const remainLine = L.polyline(remain, {
-        color: steel,
-        weight: remainW,
-        opacity: remainOp,
-        dashArray: '4 8',
-        lineCap: 'round',
-        className: 'route-remain',
-        interactive: false,
-      }).addTo(group)
-      const flownLine = L.polyline(flown, {
-        color: amber,
-        weight: flownW,
-        opacity: 0.72,
-        lineCap: 'round',
-        interactive: false,
-      }).addTo(group)
-      const originM = L.marker(from, {
-        icon: airportIcon(selected.from, 'origin'),
-        interactive: false,
-        keyboard: false,
-        zIndexOffset: 200,
-      }).addTo(group)
-      const destM = L.marker(to, {
-        icon: airportIcon(selected.to, 'dest'),
-        interactive: false,
-        keyboard: false,
-        zIndexOffset: 200,
-      }).addTo(group)
-      group.addTo(map)
-      routeRef.current = { group, halo, remainLine, flownLine, originM, destM, from: selected.from, to: selected.to }
-    } else {
+    const paintRoute = (flight, t) => {
+      const split = splitRoute(flight.origin, flight.dest, flight.progress)
+      const drawn = drawSplit(split.flown, split.remain, t)
+      const origin = [flight.origin.lat, flight.origin.lng]
+      const dest = [flight.dest.lat, flight.dest.lng]
+      if (!routeRef.current) {
+        const group = L.layerGroup()
+        const halo = L.polyline(drawn.path, {
+          ...lineOpts,
+          color: steel,
+          weight: 4,
+          opacity: 0.08,
+        }).addTo(group)
+        const remainLine = L.polyline(drawn.remain, {
+          ...lineOpts,
+          color: steel,
+          weight: remainW,
+          opacity: remainOp,
+          dashArray: '4 8',
+          className: 'route-remain',
+        }).addTo(group)
+        const flownLine = L.polyline(drawn.flown, {
+          ...lineOpts,
+          color: amber,
+          weight: flownW,
+          opacity: 0.82,
+          className: 'route-flown',
+        }).addTo(group)
+        const originM = L.marker(origin, {
+          icon: airportIcon(flight.from, 'origin'),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 200,
+        }).addTo(group)
+        const destM = L.marker(dest, {
+          icon: airportIcon(flight.to, 'dest'),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 200,
+        }).addTo(group)
+        group.addTo(map)
+        routeRef.current = { group, halo, remainLine, flownLine, originM, destM, from: flight.from, to: flight.to }
+        return
+      }
       const layer = routeRef.current
-      layer.halo.setLatLngs(path)
-      layer.remainLine.setLatLngs(remain)
+      layer.halo.options.smoothFactor = 0
+      layer.remainLine.options.smoothFactor = 0
+      layer.flownLine.options.smoothFactor = 0
+      layer.halo.setLatLngs(drawn.path)
+      layer.remainLine.setLatLngs(drawn.remain)
       layer.halo.setStyle({ color: steel, opacity: 0.08, weight: 4 })
       layer.remainLine.setStyle({ color: steel, opacity: remainOp, weight: remainW })
-      layer.flownLine.setLatLngs(flown)
-      layer.flownLine.setStyle({ color: amber, opacity: 0.72, weight: flownW })
-      layer.originM.setLatLng(from)
-      layer.destM.setLatLng(to)
-      if (layer.from !== selected.from) {
-        layer.originM.setIcon(airportIcon(selected.from, 'origin'))
-        layer.from = selected.from
+      layer.flownLine.setLatLngs(drawn.flown)
+      layer.flownLine.setStyle({ color: amber, opacity: 0.82, weight: flownW })
+      layer.originM.setLatLng(origin)
+      layer.destM.setLatLng(dest)
+      if (layer.from !== flight.from) {
+        layer.originM.setIcon(airportIcon(flight.from, 'origin'))
+        layer.from = flight.from
       }
-      if (layer.to !== selected.to) {
-        layer.destM.setIcon(airportIcon(selected.to, 'dest'))
-        layer.to = selected.to
+      if (layer.to !== flight.to) {
+        layer.destM.setIcon(airportIcon(flight.to, 'dest'))
+        layer.to = flight.to
       }
     }
+
+    const routeKey = `${selected.uid}:${selected.from}:${selected.to}`
+    const reduced = prefersReducedMotion()
+    if (drawRef.current.key !== routeKey) {
+      if (drawRef.current.raf) cancelAnimationFrame(drawRef.current.raf)
+      drawRef.current.key = routeKey
+      drawRef.current.t = reduced ? 1 : 0
+      drawRef.current.start = performance.now()
+      if (!reduced && routeRef.current) {
+        routeRef.current.halo.setLatLngs([])
+        routeRef.current.flownLine.setLatLngs([])
+        routeRef.current.remainLine.setLatLngs([])
+      }
+      if (!reduced) {
+        const tickDraw = (now) => {
+          if (drawRef.current.key !== routeKey) return
+          const t = Math.min(1, (now - drawRef.current.start) / DRAW_MS)
+          const eased = 1 - (1 - t) ** 3
+          drawRef.current.t = eased
+          const live = markersRef.current[selected.uid]?._flight || selected
+          if (live?.origin && live?.dest) paintRoute(live, eased)
+          if (t < 1) drawRef.current.raf = requestAnimationFrame(tickDraw)
+        }
+        drawRef.current.raf = requestAnimationFrame(tickDraw)
+      }
+    }
+    paintRoute(selected, drawRef.current.t)
 
     const here = [selected.lat, selected.lng]
     const hk = hudKey(selected)
