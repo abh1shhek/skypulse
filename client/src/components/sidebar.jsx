@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import useFlightStore from '../store/useFlightStore'
 import { I, Icon } from './icons'
 import BrandMark from './BrandMark'
@@ -92,6 +92,8 @@ function Wordmark() {
 
 export default function Sidebar() {
   const { query, setQuery, nav, setNav, sidebarOpen, setSidebarOpen, setSelected, flights, news } = useFlightStore()
+  const railRef = useRef(null)
+  const indicatorRef = useRef(null)
 
   const brief = news.filter((n) => n.url && n.url !== '#').slice(0, 3)
 
@@ -100,12 +102,50 @@ export default function Sidebar() {
     setSidebarOpen(false)
   }
 
+  useLayoutEffect(() => {
+    const rail = railRef.current
+    const bar = indicatorRef.current
+    if (!rail || !bar) return
+
+    const offsetY = (el) => {
+      let y = 0
+      let node = el
+      while (node && node !== rail) {
+        y += node.offsetTop
+        node = node.offsetParent
+      }
+      return y
+    }
+
+    const place = () => {
+      const active = rail.querySelector('.nav-item.is-active')
+      if (!active) {
+        bar.style.opacity = '0'
+        return
+      }
+      bar.style.opacity = '1'
+      bar.style.height = `${active.offsetHeight}px`
+      bar.style.transform = `translate3d(0, ${offsetY(active)}px, 0)`
+    }
+
+    place()
+    const ro = new ResizeObserver(place)
+    ro.observe(rail)
+    rail.addEventListener('transitionend', place)
+    return () => {
+      ro.disconnect()
+      rail.removeEventListener('transitionend', place)
+    }
+  }, [nav, sidebarOpen, brief.length])
+
   return (
     <aside
       id="skypulse-rail"
+      ref={railRef}
       className={`rail ${sidebarOpen ? 'is-open' : ''}`}
       aria-label="SkyPulse navigation"
     >
+      <span ref={indicatorRef} className="nav-indicator" aria-hidden="true" />
       <div className="rail__brand">
         <div className="rail__mark">
           <BrandMark size={48} />

@@ -54,6 +54,7 @@ button, input { font-family: inherit; }
 
 /* ─── Sidebar ─── */
 .rail {
+  position: relative;
   width: 232px;
   flex-shrink: 0;
   height: 100vh;
@@ -63,6 +64,20 @@ button, input { font-family: inherit; }
   flex-direction: column;
   z-index: 30;
   transition: transform var(--duration) var(--ease-out);
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 36px;
+  background: var(--accent);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 200ms var(--ease-out), height 200ms var(--ease-out), opacity 160ms var(--ease-out);
+  z-index: 1;
 }
 
 .rail__brand {
@@ -238,7 +253,6 @@ button, input { font-family: inherit; }
 .nav-item--primary.is-active {
   color: var(--text);
   background: transparent;
-  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .nav-item--primary.is-active svg { color: var(--accent); opacity: 1; }
@@ -859,6 +873,31 @@ button, input { font-family: inherit; }
 /* ─── Map markers ─── */
 .leaflet-container { background: var(--bg) !important; z-index: 0 !important; }
 .leaflet-tile-pane { filter: grayscale(1) brightness(0.36) contrast(1.04); }
+.leaflet-scan-pane { z-index: 250; pointer-events: none; }
+.map-scan {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.map-scan__beam {
+  position: absolute;
+  inset: -18%;
+  background: conic-gradient(
+    from 210deg,
+    transparent 0deg,
+    transparent 352deg,
+    color-mix(in srgb, var(--info) 14%, transparent) 357deg,
+    color-mix(in srgb, var(--info) 22%, transparent) 360deg
+  );
+  opacity: 0.16;
+  animation: map-scan 10s linear infinite;
+  will-change: transform;
+}
+@keyframes map-scan {
+  to { transform: rotate(360deg); }
+}
 .leaflet-control-attribution {
   background: transparent !important;
   color: #3a3a40 !important;
@@ -1311,4 +1350,12 @@ button, input { font-family: inherit; }
   .ac-pulse { animation: none; opacity: 0.35; }
   .route-remain { animation: none; }
   .live-dot { animation: none; opacity: 1; transform: none; }
+  .map-scan,
+  .map-scan__beam {
+    display: none !important;
+    animation: none !important;
+  }
+  .nav-indicator {
+    transition: none !important;
+  }
 }

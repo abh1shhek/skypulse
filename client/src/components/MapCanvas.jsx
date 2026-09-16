@@ -205,6 +205,48 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       { maxZoom: 19 }
     ).addTo(map)
 
+    const scanReduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let scanEl = null
+    const syncScan = () => {
+      if (!scanEl) return
+      const size = map.getSize()
+      scanEl.style.width = `${size.x}px`
+      scanEl.style.height = `${size.y}px`
+      L.DomUtil.setPosition(scanEl, map.containerPointToLayerPoint([0, 0]))
+    }
+    const placeScan = () => {
+      if (!scanEl) return
+      L.DomUtil.setPosition(scanEl, map.containerPointToLayerPoint([0, 0]))
+    }
+    const mountScan = () => {
+      if (scanEl || scanReduced.matches) return
+      if (!map.getPane('scan')) {
+        map.createPane('scan')
+        const pane = map.getPane('scan')
+        pane.style.zIndex = '250'
+        pane.style.pointerEvents = 'none'
+      }
+      scanEl = L.DomUtil.create('div', 'map-scan', map.getPane('scan'))
+      scanEl.setAttribute('aria-hidden', 'true')
+      scanEl.innerHTML = '<div class="map-scan__beam"></div>'
+      map.on('move', placeScan)
+      map.on('resize zoom', syncScan)
+      syncScan()
+    }
+    const unmountScan = () => {
+      if (!scanEl) return
+      map.off('move', placeScan)
+      map.off('resize zoom', syncScan)
+      scanEl.remove()
+      scanEl = null
+    }
+    const onScanMotion = () => {
+      if (scanReduced.matches) unmountScan()
+      else mountScan()
+    }
+    mountScan()
+    scanReduced.addEventListener('change', onScanMotion)
+
     map.on('dragstart', () => {
       if (followRef.current) onFollowChangeRef.current?.(false)
     })
@@ -236,6 +278,8 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
     ro.observe(el)
 
     return () => {
+      scanReduced.removeEventListener('change', onScanMotion)
+      unmountScan()
       ro.disconnect()
       map.remove()
       instanceRef.current = null
