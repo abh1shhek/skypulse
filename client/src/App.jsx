@@ -104,6 +104,7 @@ export default function App() {
   const selectFlight = (id) => {
     setSelected(id)
     setMapFollow(true)
+    setSidebarOpen(false)
   }
 
   const live = nav === 'tracking'
