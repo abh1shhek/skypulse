@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { getFlights, getNews } from '../services/api'
 import { enrichFlights, tickFlight } from '../lib/enrichFlights'
+import { fallbackFlights, takeLiveFlights } from '../lib/flightFeed'
 import { NAV_IDS } from '../lib/nav'
 
 function readFollowed() {
@@ -26,12 +27,28 @@ function writeHash(nav, replace = false) {
   else window.history.pushState({ nav }, '', next)
 }
 
+function applyFlights(set, get, raw, source) {
+  const flights = enrichFlights(raw)
+  const selectedId = get().selectedId
+  const stillThere = selectedId && flights.some((f) => f.uid === selectedId)
+  set({
+    flights,
+    loading: false,
+    error: null,
+    source,
+    selectedId: stillThere ? selectedId : flights[0]?.uid || null,
+  })
+}
+
+let flightRequest = null
+
 const useFlightStore = create((set, get) => ({
   flights: [],
   news: [],
   selectedId: null,
   loading: true,
   error: null,
+  source: 'live',
   query: '',
   nav: navFromHash(),
   sidebarOpen: false,
@@ -48,21 +65,21 @@ const useFlightStore = create((set, get) => ({
   },
 
   fetchFlights: async (params = { dep_iata: 'DEL' }) => {
-    set({ loading: true, error: null })
-    try {
-      const data = await getFlights(params)
-      if (!Array.isArray(data)) throw new Error('Invalid flights payload')
-      const flights = enrichFlights(data)
-      const selectedId = get().selectedId
-      const stillThere = selectedId && flights.some((f) => f.uid === selectedId)
-      set({
-        flights,
-        loading: false,
-        selectedId: stillThere ? selectedId : flights[0]?.uid || null,
-      })
-    } catch {
-      set({ error: 'Failed to load flights', loading: false, flights: [] })
-    }
+    if (flightRequest) return flightRequest
+    flightRequest = (async () => {
+      set({ loading: true, error: null })
+      try {
+        const live = takeLiveFlights(await getFlights(params))
+        if (!live) throw new Error('empty')
+        applyFlights(set, get, live.data, 'live')
+      } catch {
+        const fallback = fallbackFlights()
+        applyFlights(set, get, fallback.data, fallback.source)
+      } finally {
+        flightRequest = null
+      }
+    })()
+    return flightRequest
   },
 
   fetchNews: async (keywords = 'aviation India') => {

@@ -25,6 +25,13 @@ router.get('/', async (req, res) => {
 
     console.log('→ Raw count:', response.data?.data?.length);
 
+    if (response.data?.error) {
+      return res.status(502).json({
+        error: 'Failed to fetch flight data',
+        detail: response.data.error,
+      })
+    }
+
     const flights = (response.data.data || []).map(f => ({
       id:       f.flight?.iata    || f.flight?.number || 'N/A',
       callsign: f.flight?.icao   || 'N/A',

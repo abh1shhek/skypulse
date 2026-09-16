@@ -14,7 +14,7 @@ export default function App() {
     selectedId,
     loading,
     query,
-    error,
+    source,
     nav,
     followed,
     fetchFlights,
@@ -156,10 +156,10 @@ export default function App() {
               <button
                 type="button"
                 className="hud__chip"
-                onClick={() => error && fetchFlights({ dep_iata: 'DEL' })}
+                onClick={() => source !== 'live' && fetchFlights({ dep_iata: 'DEL' })}
               >
                 <i className="live-dot" />
-                {error ? 'Signal lost — retry' : 'Live operations'}
+                {source === 'cache' ? 'Cached operations' : source === 'mock' ? 'Demo operations' : 'Live operations'}
               </button>
               <div className="map-tools">
                 <div className="zoom">
