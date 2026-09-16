@@ -1072,9 +1072,13 @@ button, input { font-family: inherit; }
     var(--grad-info),
     var(--grad-elev);
 }
+.overview__brand .airline-logo {
+  width: 72px;
+  height: 72px;
+}
 .overview__brand .airline-logo--mark {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   font-size: 16px;
 }
 .overview__feature-copy { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 8px; min-width: 0; }
@@ -1249,11 +1253,14 @@ button, input { font-family: inherit; }
 /* ─── Aircraft & airport markers ─── */
 .apt-icon { pointer-events: none !important; }
 .apt {
+  width: 92px;
+  height: 28px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
 }
+.apt--lead { justify-content: flex-end; }
 .apt__dot {
   width: 6px;
   height: 6px;

@@ -39,14 +39,31 @@ function aircraftIcon(flight, selected) {
   })
 }
 
-function airportIcon(code, kind) {
+function airportIcon(code, kind, side = 'right') {
   const label = safeCode(code)
+  const lead = side === 'left'
+  const inner = lead
+    ? `<span class="apt__code">${label}</span><span class="apt__dot"></span>`
+    : `<span class="apt__dot"></span><span class="apt__code">${label}</span>`
   return L.divIcon({
-    html: `<div class="apt apt--${kind}"><span class="apt__dot"></span><span class="apt__code">${label}</span></div>`,
+    html: `<div class="apt apt--${kind}${lead ? ' apt--lead' : ''}">${inner}</div>`,
     className: 'apt-icon',
     iconSize: [92, 28],
-    iconAnchor: [6, 14],
+    iconAnchor: lead ? [88, 14] : [4, 14],
   })
+}
+
+function endpointLabelSides(origin, dest) {
+  const pts = geodesicPoints(origin, dest, 8)
+  if (pts.length < 2) return { origin: 'right', dest: 'right' }
+  const a = pts[0]
+  const b = pts[1]
+  const c = pts[pts.length - 2]
+  const d = pts[pts.length - 1]
+  return {
+    origin: b.lng >= a.lng ? 'left' : 'right',
+    dest: d.lng >= c.lng ? 'right' : 'left',
+  }
 }
 
 function toFeet(meters) {
@@ -304,6 +321,7 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       const drawn = drawSplit(split.flown, split.remain, t)
       const origin = [flight.origin.lat, flight.origin.lng]
       const dest = [flight.dest.lat, flight.dest.lng]
+      const sides = endpointLabelSides(flight.origin, flight.dest)
       if (!routeRef.current) {
         const group = L.layerGroup()
         const halo = L.polyline(drawn.path, {
@@ -328,19 +346,23 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
           className: 'route-flown',
         }).addTo(group)
         const originM = L.marker(origin, {
-          icon: airportIcon(flight.from, 'origin'),
+          icon: airportIcon(flight.from, 'origin', sides.origin),
           interactive: false,
           keyboard: false,
           zIndexOffset: 200,
         }).addTo(group)
         const destM = L.marker(dest, {
-          icon: airportIcon(flight.to, 'dest'),
+          icon: airportIcon(flight.to, 'dest', sides.dest),
           interactive: false,
           keyboard: false,
           zIndexOffset: 200,
         }).addTo(group)
         group.addTo(map)
-        routeRef.current = { group, halo, remainLine, flownLine, originM, destM, from: flight.from, to: flight.to }
+        routeRef.current = {
+          group, halo, remainLine, flownLine, originM, destM,
+          from: flight.from, to: flight.to,
+          originSide: sides.origin, destSide: sides.dest,
+        }
         return
       }
       const layer = routeRef.current
@@ -355,13 +377,15 @@ export default function MapCanvas({ flights, selectedId, onSelect, onReady, foll
       layer.flownLine.setStyle({ color: amber, opacity: 0.82, weight: flownW })
       layer.originM.setLatLng(origin)
       layer.destM.setLatLng(dest)
-      if (layer.from !== flight.from) {
-        layer.originM.setIcon(airportIcon(flight.from, 'origin'))
+      if (layer.from !== flight.from || layer.originSide !== sides.origin) {
+        layer.originM.setIcon(airportIcon(flight.from, 'origin', sides.origin))
         layer.from = flight.from
+        layer.originSide = sides.origin
       }
-      if (layer.to !== flight.to) {
-        layer.destM.setIcon(airportIcon(flight.to, 'dest'))
+      if (layer.to !== flight.to || layer.destSide !== sides.dest) {
+        layer.destM.setIcon(airportIcon(flight.to, 'dest', sides.dest))
         layer.to = flight.to
+        layer.destSide = sides.dest
       }
     }
 
